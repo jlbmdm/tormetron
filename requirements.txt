@@ -1,0 +1,18 @@
+Required packages:
+    requests
+    numpy
+    osgeo (gdal gdalconst)
+    click
+    PIL
+    #urllib3 (sin uso por el momento)
+
+Python imports:
+    os
+    sys
+    time
+    datetime
+    setuptools
+    getpass
+    configparser
+    pathlib
+    json
