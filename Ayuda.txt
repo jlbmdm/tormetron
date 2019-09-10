@@ -1,0 +1,36 @@
+Secuencia básica
+
+En gitbash (o cmd):
+  Ir a la carpeta en la que tienes tus proyectos (en mi caso D;\_ws)
+    $ cd d:
+    $ cd _ws
+  No se si hay que iniciar git:
+    $ git init
+  Descargar el repo de tormetron desde github:
+    $ git clone https://github.com/jlbmdm/tormetron.git
+      No estoy seguro si se escribe así... o si tienes que poner delante tu nombre de usuario de github.com (tu e-mail)
+      Supongo que pide usuario y contraseña (puede que más de una vez).
+
+  Cuando consigas hacer tu copia del repo, consulta el estado:
+    $ git status
+  Si en el entretando yo he hecho cambios te avisa que la versión en github.com tiene cambios. Actualiza tu versión con:
+    $ git pull
+      Get the latest version from the remote. This saves merging issues later.
+  Modifica en tu PC uno de los ficheros, por ejemplo el Readme.md con un editor (p. ej. notepad++).
+  Pregunta de nuevo el estado:
+    $ git status
+      Te dirá que readme.md ha cambiado en tu local
+  Carga el fichero modificado en el staging area (el index) que es como la bandeja de salida
+    $ git add readme.md
+  Sube los cambios a tu repo local:
+    $ git commit -m "Cambios menores en readme.md"
+  Subelo al repo remoto (a github.com):
+    Si pones esto:
+      $ git push origin
+        Entiendo que pides incorporar los cambios al master y lo tengo que autorizar
+    Si pones esto otro:
+      $ git push origin davidBranch
+        Supongo que creas una rama tuya y no me pregunta nada.
+        Eso sí, cuando quieras hacer un merge al master, con todos los cambios, supongo que lo tendré que autorizar yo
+ 
+ to be continued...

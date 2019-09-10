@@ -14,6 +14,11 @@ Tormetron funciona en Python 2.7 y en Python 3.5 y superior.
 
 ## Uso de tormetron
 
+Tormetron incluye un paquete llamado radatron con el módodulo radares.py que tiene tres clases:
+  EstacionRadar     -> Lista de estaciones radar de AEMET
+  ImagenRadarAEMET  -> Con métodos para la descarga de imágenes radar
+  ImagenRadarFile   -> Con méodos para procesar georreferenciar imágenes descargadas.
+
 TODO:
 
     $ tormetron 10 cada minutos
