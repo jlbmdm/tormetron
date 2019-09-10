@@ -21,7 +21,8 @@ En gitbash (o cmd):
     $ git status
       Te dirá que readme.md ha cambiado en tu local
   Carga el fichero modificado en el staging area (el index) que es como la bandeja de salida
-    $ git add readme.md
+    $ git add README.md
+      __ATENCION__: git distingue mayusculas/minúsculas: usar la grafía correcta
   Sube los cambios a tu repo local:
     $ git commit -m "Cambios menores en readme.md"
   Subelo al repo remoto (a github.com):
