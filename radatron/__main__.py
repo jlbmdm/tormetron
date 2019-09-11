@@ -18,18 +18,31 @@ except ImportError:    # Python 2
     from ConfigParser import RawConfigParser
 
 try:
-    from radatron import radares
+    #REMOVE: quitar los comentarios y los print() al cargar los módulos
+    #Esto funciona cuando el módulo se carga al importar el paquete radatron:
+    #Este es el modo normal para cargar el package:
+    #    >>> import radatron     # importo el paquete (sus clases) desde el interpreta de python
+    #    $ python -m radatron    # ejecuto el paquete con la opción -m (ejecuta su __main__.py)
+    #REMOVE:\>
+    import radatron
+    print('Import radares from radatron ok (loading %s package)' % __name__)
 except:
-    import radares
+    #REMOVE: quitar los comentarios y los print() al cargar los módulos
+    #Esto funciona cuando este módulo se ejecuta de forma no ortodoxa:
+    #    $ python __main__.py
+    #REMOVE:\>
+    import radares as radatron
+    print('Import radares from __main__.py ok (loading %s package)' % __name__)
 
-HOME_DIR = str(pathlib.Path.home())
 FILE_DIR = os.path.dirname(os.path.abspath(__file__)) #Equivale a FILE_DIR = pathlib.Path(__file__).parent
+WORK_DIR = os.path.abspath(os.path.join(FILE_DIR, '..'))
+VERBOSE = False
+
+#REMOVE: quitar este chequeo de directorios
+HOME_DIR = str(pathlib.Path.home())
 RAIZ_DIR = os.path.abspath(os.path.join(FILE_DIR, '..'))
 BASE_DIR = os.path.abspath('.')
 PADRE_DIR = os.path.abspath('..') #Equivale a PADRE_DIR = os.path.abspath(r'../')
-WORK_DIR = RAIZ_DIR
-VERBOSE = False
-
 if VERBOSE:
     print('Fichero que se esta ejecutando:', __file__)
     print('\nDirectorios de la aplicación (no cambian):')
@@ -40,14 +53,16 @@ if VERBOSE:
     print('  Directorio padre del BASE_DIR                        (PADRE_DIR):', PADRE_DIR)
     print('Directorio HOME del usuario                             (HOME_DIR):', HOME_DIR)
     print('\nDirectorio de trabajo -> RAIZ_DIR                       (WORK_DIR):', WORK_DIR)
+if not os.path.exists(os.path.join(WORK_DIR, 'radatron')):
+    #Esto no deberia ocurrir: significaria que se ha cambiado el nombre al paquete
+    print('\nFalta el directorio /radatron; revisar nombre del paquete')
+    sys.exit(0)
+#REMOVE:\>
 
-if not os.path.exists(os.path.join(RAIZ_DIR, 'radatron')):
-    print('\nFalta el directorio                                                    ', 'radatron')
-
-configFileName = '%s%s' % (FILE_DIR, '/config.cfg')
 config = RawConfigParser()
 config.optionxform = str #Avoid change to lowercase
 config_dict = {}
+configFileName = '%s%s' % (FILE_DIR, '/config.cfg')
 if os.path.exists(configFileName):
     try:
         config.read(configFileName)
@@ -75,25 +90,28 @@ if os.path.exists(configFileName):
             config_dict['urlRadarAcum6h_ref1'] = '<div id="imagen%i" class="item">'
         if not 'urlRadarAcum6h_ref2' in config_dict.keys():
             config_dict['urlRadarAcum6h_ref2'] = '<img class="lazyOwl" data-src="'
-
     except:
         print('Error en fichero de configuracion:', configFileName)
         print('Se usan valores por defecto')
         config_dict['tipodescarga'] = ['1']
         config_dict['estaciones'] = ['Palencia']
         config_dict['modo'] = ['p']
-        config_dict['urlRadarAcum6h_Palencia'] = 'http://www.aemet.es/es/eltiempo/observacion/radar?w=1&p=vd&opc1=3'
+        config_dict['urlRadarAcum6h'] = 'http://www.aemet.es/es/eltiempo/observacion/radar?w=1&p={}&opc1=3'
+        config_dict['urlRadarAcum6h_ref1'] = '<div id="imagen%i" class="item">'
+        config_dict['urlRadarAcum6h_ref2'] = '<img class="lazyOwl" data-src="'
 else:
     print('Fichero de configuracion no encontrado:', configFileName)
     print('Se usan valores por defecto')
     config_dict['tipodescarga'] = ['1']
     config_dict['estaciones'] = ['Palencia']
     config_dict['modo'] = ['p']
-    config_dict['urlRadarAcum6h_Palencia'] = 'http://www.aemet.es/es/eltiempo/observacion/radar?w=1&p=vd&opc1=3'
-#print('config_dict', config_dict)
+    config_dict['urlRadarAcum6h'] = 'http://www.aemet.es/es/eltiempo/observacion/radar?w=1&p={}&opc1=3'
+    config_dict['urlRadarAcum6h_ref1'] = '<div id="imagen%i" class="item">'
+    config_dict['urlRadarAcum6h_ref2'] = '<img class="lazyOwl" data-src="'
 
-def habilitar_rutas(directorio):
-    ruta_imagenes_radar = os.path.join(WORK_DIR, directorio)
+
+def habilitar_rutas(carpeta):
+    ruta_imagenes_radar = os.path.join(WORK_DIR, carpeta)
     if not os.path.exists(ruta_imagenes_radar):
         #print( 'No existe el directorio %s -> Se crea automaticamente' % (ruta_imagenes_radar) )
         try:
@@ -112,12 +130,13 @@ def habilitar_rutas(directorio):
         os.makedirs(ruta_asc)
     return ruta_orig, ruta_tif, ruta_asc
 
-def descargarRadar(tipo_radar, dict_radar, modo, directorio):
-    ruta_orig, ruta_tif, ruta_asc = habilitar_rutas(directorio)
+
+def descargarRadar(tipo_radar, dict_radar, modo, carpeta):
+    ruta_orig, ruta_tif, ruta_asc = habilitar_rutas(carpeta)
     cod_estacion = dict_radar.cod
     nombre_raw_estacion = dict_radar.nombre_raw
 
-    imagen_radar = radares.ImagenRadarAEMET(dict_radar, verbose=VERBOSE)
+    imagen_radar = radatron.ImagenRadarAEMET(dict_radar, verbose=VERBOSE)
     while True:
         if tipo_radar == 'radar':
             rpta = imagen_radar.descargar_mapa_radar_regional(ruta_orig=ruta_orig,
@@ -133,8 +152,9 @@ def descargarRadar(tipo_radar, dict_radar, modo, directorio):
         if rpta['status'] == 200:
             descargaOk = True
         else:
+            numero_error = rpta['status']
             nombre_imagen_radar_orig_con_ruta = rpta['out_file']
-            print('Error descargando o guardando: {}'.format(nombre_imagen_radar_orig_con_ruta))
+            print('Error {} descargando o guardando: {}'.format(numero_error, nombre_imagen_radar_orig_con_ruta))
             print('Revisar el codigo o la conexión a Internet')
             descargaOk = False
             #sys.exit(4)
@@ -142,14 +162,13 @@ def descargarRadar(tipo_radar, dict_radar, modo, directorio):
         for nombre_imagen_radar_orig_con_ruta in rpta['out_file']:
             nombre_imagen_radar_tif_con_ruta = nombre_imagen_radar_orig_con_ruta.replace(ruta_orig, ruta_tif).replace('.gif', '.tif').replace('.png', '.tif')
             nombre_imagen_radar_asc_con_ruta = nombre_imagen_radar_orig_con_ruta.replace(ruta_orig, ruta_asc).replace('.gif', '.asc').replace('.png', '.asc')
-    
             if descargaOk:
                 if dict_radar.nombre == 'Palencia':
-                    imagen_radar_file = radares.ImagenRadarFile(nombre_imagen_radar_orig_con_ruta=nombre_imagen_radar_orig_con_ruta,
-                                                                nombre_imagen_radar_tif_con_ruta=nombre_imagen_radar_tif_con_ruta,
-                                                                nombre_imagen_radar_asc_con_ruta=nombre_imagen_radar_asc_con_ruta,
-                                                                tipo_imagen=tipo_radar,
-                                                                verbose=VERBOSE)
+                    imagen_radar_file = radatron.ImagenRadarFile(nombre_imagen_radar_orig_con_ruta=nombre_imagen_radar_orig_con_ruta,
+                                                                 nombre_imagen_radar_tif_con_ruta=nombre_imagen_radar_tif_con_ruta,
+                                                                 nombre_imagen_radar_asc_con_ruta=nombre_imagen_radar_asc_con_ruta,
+                                                                 tipo_imagen=tipo_radar,
+                                                                 verbose=VERBOSE)
                     imagen_radar_file.georeferenciarImagenRadar()
                     imagen_radar_file.guardar_raster_asc()
                     if tipo_radar == 'radar':
@@ -182,8 +201,8 @@ def descargarRadar(tipo_radar, dict_radar, modo, directorio):
 @click.option('-r', '--radar', default='1', prompt='Elige: (1): ultimo radar; (2) acum de las ultimas 6 horas', help='Descarga la última imagen del radar de AEMET')
 @click.option('-e', '--estacion', default='', help='Indica el nombre o codigo de la estacón radar. Por defecto, Palencia')
 @click.option('-m', '--modo', default='', prompt='Escribe "c" para descarga continua', help='Escribe "c" (sin comillas) si se quieres programar la descarga cada 10 minutos (último radar) o 1 día (acum de las últimas 6 horas)')
-@click.option('-d', '--directorio', default='data', help='Indica el nombre de la carpeta en la que guardar las imágenes. Por defecto, "data"')
-def main(estacion='', radar='', modo='', directorio=''):
+@click.option('-d', '--carpeta', default='data', help='Indica el nombre de la carpeta en la que guardar las imágenes. Por defecto, "data"')
+def main(estacion='', radar='', modo='', carpeta=''):
     estacion_solicitada = estacion
     modo = modo.lower()
     if radar == '1':
@@ -207,26 +226,24 @@ def main(estacion='', radar='', modo='', directorio=''):
             print('Falta propiedad estacion en el fichero de configuración', configFileName)
             estacion_solicitada = config_dict['estaciones'][0]
 
-    #print('->', EstacionRadar.LISTA_RADAR)
-
     if modo == '':
-        modo = config_dict['modo'][0]
+        modo = config_dict['modo'][0].lower()
     if modo == 'c':
-        #descarga_continua = True
         if tipo_radar == 'radar':
-            modo_solicitado = 'Se deja que la apllicación descargue las imágenes cada 10 minutos'
+            modo_solicitado = 'Se deja que la aplicación descargue las imágenes cada 10 minutos'
+        elif tipo_radar == 'acum6h':
+            modo_solicitado = 'Se deja que la aplicación descargue las imágenes cada 24 horas (a las 8:00 a.m.)'
         else:
-            modo_solicitado = 'Se deja que la apllicación descargue las imágenes cada 24 horas (a las 8:00 a.m.)'
+            modo_solicitado = 'Opcion imposible'
     else:
-        #descarga_continua = False
         modo_solicitado = 'Descarga puntual'
     print('Radar solicitado:', estacion_solicitada, '-', tipo_radar, '-', modo_solicitado, end=' - ')
 
-    lista_radares = radares.EstacionRadar.buscar_estacion(estacion_solicitada) #<class 'list'>
-    #print('lista_radares2', lista_radares)
+    lista_radares = radatron.EstacionRadar.buscar_estacion(estacion_solicitada) #<class 'list'>
+    #print('lista_radares', lista_radares)
     if lista_radares is None or len(lista_radares) == 0:
         print('Radar de %s no encontrado. Escribe el nombre o codigo corecto. Nombres validos:' % estacion_solicitada)
-        for mi_lista_radar in radares.EstacionRadar.LISTA_RADAR:
+        for mi_lista_radar in radatron.EstacionRadar.LISTA_RADAR:
             #TODO: arreglar para que muestre bien los acentos -> decode()
             print('\t', mi_lista_radar['nombre'])
         quit()
@@ -234,10 +251,10 @@ def main(estacion='', radar='', modo='', directorio=''):
     dict_radar = lista_radares[0] #<class '__main__.EstacionRadar'>
     print('Radar encontrado:', dict_radar.nombre) #<class '__main__.EstacionRadar'>
 
-    if directorio == '':
-        directorio = config_dict['directorio'][0]
+    if carpeta == '':
+        carpeta = config_dict['carpeta'][0]
 
-    descargarRadar(tipo_radar, dict_radar, modo, directorio)
+    descargarRadar(tipo_radar, dict_radar, modo, carpeta)
 
 
 if __name__ == '__main__':

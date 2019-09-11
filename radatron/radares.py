@@ -410,7 +410,7 @@ class ImagenRadarAEMET:
             posicion3 = posicion2 + rpta1.text[posicion2:].find('.gif')
             avance3 = 4
             urlImagen = 'http://www.aemet.es%s' % rpta1.text[posicion2 + avance2: posicion3 + avance3]
-            idImagen = urlImagen[-21:-4]
+            idImagen = urlImagen[-21:-4].replace('\\', '_').replace('/', '_')
             nombre_Imagen_acum6h_con_ruta_fechado = nombre_Imagen_acum6h_con_ruta.replace('.gif', f'_{idImagen}.gif')
             if os.path.exists(nombre_Imagen_acum6h_con_ruta_fechado):
                 continue
@@ -446,15 +446,16 @@ class ImagenRadarAEMET:
                 print('No se ha encontrado la imagen en', urlImagen)
                 return {'status': 700, 'out_file': lista_nombre_ficheros}
 
-            try:
+#             try:
+            if True:
                 myImage = open(nombre_Imagen_acum6h_con_ruta_fechado, 'wb')
                 myImage.write(rpta2.content)
                 myImage.close()
                 if self.verbose:
                     print('    Se ha creado una nueva imagen', nombre_Imagen_acum6h_con_ruta_fechado, 'de', os.path.getsize(nombre_Imagen_acum6h_con_ruta_fechado), 'bytes')
-            except:
-                print('    Error 1 - imagen no guardada', nombre_Imagen_acum6h_con_ruta_fechado)
-                return {'status': 800, 'out_file': lista_nombre_ficheros}
+#             except:
+#                 print('    Error 1 - imagen no guardada', nombre_Imagen_acum6h_con_ruta_fechado)
+#                 return {'status': 800, 'out_file': lista_nombre_ficheros}
 
         return {'status': 200, 'out_file': lista_nombre_ficheros}
 
