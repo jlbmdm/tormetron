@@ -14,7 +14,29 @@ Tormetron funciona en Python 2.7 y en Python 3.5 y superior.
 
 ## Uso de tormetron
 
-TODO: preparar unas instrucciones de uso
+Uso en linea de comandos:
+  $ python -m radatron [ops]
+    ops:
+    --radar n
+      Donde n: 1-> ultimo radar; 2-> acum de las ultimas 6 horas
+    --estacion nombre
+      Donde Nombre: Nombre o codigo de la estacón radar; por defecto, Palencia
+    --modo m
+      Donde m: p-> descarga puntual; c-> descarga programada la cada 10 minutos (último radar) o 24 horas (acum de las últimas 6 horas)
+    --carpeta dir
+      Donde dir: nombre de la carpeta en la que guardar las imágenes; por defecto, "data"
+  Los comandos se puede abreviar respectivamente: -r, -e, -m, -c
+
+  Ejemplos:
+    $ python -m radatron --radar 1 --estacion Madrid
+    $ python -m radatron -r 2 -e Palencia -m c --carpeta radarPalencia
+
+Uso desde un script:
+>>> import radatron
+>>> imagen_radar = radatron.ImagenRadarAEMET({'nombre':'Palencia'}, verbose=True)
+>>> imagen_radar.descargar_mapa_radar_regional()
+
+TODO: completar las instrucciones
 
 ## Organización interna
 

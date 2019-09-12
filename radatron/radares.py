@@ -313,6 +313,7 @@ class ImagenRadarAEMET:
                 print('API KEY incorrecta')
                 quit()
             else:
+                print('descripcion:', r.json()['descripcion'], 'estado:', r.json()["estado"])
                 print('Revisar http')
                 quit()
 

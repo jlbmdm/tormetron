@@ -150,6 +150,8 @@ def descargarRadar(tipo_radar, dict_radar, modo, carpeta):
                                                                  urlRadarAcum6h_ref1=config_dict['urlRadarAcum6h_ref1'][0],
                                                                  urlRadarAcum6h_ref2=config_dict['urlRadarAcum6h_ref2'][0])
         if rpta['status'] == 200:
+            out_file = rpta["out_file"][0].replace("\\", "/")
+            print(f'Descarga radar {nombre_raw_estacion} ok. Fichero: {out_file}')
             descargaOk = True
         else:
             numero_error = rpta['status']
@@ -175,6 +177,9 @@ def descargarRadar(tipo_radar, dict_radar, modo, carpeta):
                         print('Proceso ok: imagen descargada, georreferenciada y guardada como png, tif y asc (%s)' % nombre_imagen_radar_orig_con_ruta.replace('.png', '.*'))
                     elif tipo_radar == 'acum6h':
                         print('Proceso ok: imagen descargada, georreferenciada y guardada como gif, tif y asc (%s)' % nombre_imagen_radar_orig_con_ruta.replace('.gif', '.*'))
+                else:
+                    #TODO: habilitar la georreferenciación de otras estaciones
+                    print('No se georreferencia la imagen por no ser la de Palencia')
 
         if modo == 'c':
             #time1 = time.time()
@@ -196,11 +201,12 @@ def descargarRadar(tipo_radar, dict_radar, modo, carpeta):
         else:
             break
 
+#@click.option('-m', '--modo', default='', prompt='Escribe "c" para descarga continua', help='Escribe "c" (sin comillas) si se quieres programar la descarga cada 10 minutos (último radar) o 1 día (acum de las últimas 6 horas)')
 
 @click.command()
 @click.option('-r', '--radar', default='1', prompt='Elige: (1): ultimo radar; (2) acum de las ultimas 6 horas', help='Descarga la última imagen del radar de AEMET')
 @click.option('-e', '--estacion', default='', help='Indica el nombre o codigo de la estacón radar. Por defecto, Palencia')
-@click.option('-m', '--modo', default='', prompt='Escribe "c" para descarga continua', help='Escribe "c" (sin comillas) si se quieres programar la descarga cada 10 minutos (último radar) o 1 día (acum de las últimas 6 horas)')
+@click.option('-m', '--modo', default='', help='Escribe "c" (sin comillas) si se quieres programar la descarga cada 10 minutos (último radar) o 1 día (acum de las últimas 6 horas)')
 @click.option('-d', '--carpeta', default='data', help='Indica el nombre de la carpeta en la que guardar las imágenes. Por defecto, "data"')
 def main(estacion='', radar='', modo='', carpeta=''):
     estacion_solicitada = estacion
