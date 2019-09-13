@@ -30,7 +30,9 @@ Uso en linea de comandos:
   Los comandos se puede abreviar respectivamente: -r, -e, -m, -c
 
   Ejemplos:
+  
     $ python -m radatron --radar 1 --estacion Madrid
+    
     $ python -m radatron -r 2 -e Palencia -m c --carpeta radarPalencia
 
 Uso desde un script:
