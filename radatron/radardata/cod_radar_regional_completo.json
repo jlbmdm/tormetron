@@ -1,0 +1,77 @@
+[
+    {
+        "cod": "am",
+        "nombre": "Almería",
+        "nombre_raw": "almeria"
+    },
+    {
+        "cod": "sa",
+        "nombre": "Asturias",
+        "nombre_raw": "asturias"
+    },
+    {
+        "cod": "pm",
+        "nombre": "Illes Balears",
+        "nombre_raw": "baleares"
+    },
+    {
+        "cod": "ba",
+        "nombre": "Barcelona",
+        "nombre_raw": "barcelona"
+    },
+    {
+        "cod": "cc",
+        "nombre": "Cáceres",
+        "nombre_raw": "caceres"
+    },
+    {
+        "cod": "co",
+        "nombre": "A Coruña",
+        "nombre_raw": "coruña"
+    },
+    {
+        "cod": "ma",
+        "nombre": "Madrid",
+        "nombre_raw": "madrid"
+    },
+    {
+        "cod": "ml",
+        "nombre": "Málaga",
+        "nombre_raw": "malaga"
+    },
+    {
+        "cod": "mu",
+        "nombre": "Murcia",
+        "nombre_raw": "murcia"
+    },
+    {
+        "cod": "vd",
+        "nombre": "Palencia",
+        "nombre_raw": "palencia"
+    },
+    {
+        "cod": "ca",
+        "nombre": "Las Palmas",
+        "nombre_raw": "laspalmas"
+    },
+    {
+        "cod": "se",
+        "nombre": "Sevilla",
+        "nombre_raw": "sevilla"
+    },
+    {
+        "cod": "va",
+        "nombre": "Valencia",
+        "nombre_raw": "valencia"
+    },
+    {
+        "cod": "ss",
+        "nombre": "Vizcaya",
+        "nombre_raw": "vizcaya"
+    },
+    {
+        "cod": "za",
+        "nombre": "Zaragoza",
+        "nombre_raw": "zaragoza"
+    }
+]

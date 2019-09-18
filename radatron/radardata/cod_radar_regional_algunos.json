@@ -1,0 +1,32 @@
+[
+    {
+        "cod": "sa",
+        "nombre": "Asturias",
+        "nombre_raw": "asturias"
+    },
+    {
+        "cod": "pm",
+        "nombre": "Illes Balears",
+        "nombre_raw": "baleares"
+    },
+    {
+        "cod": "ba",
+        "nombre": "Barcelona",
+        "nombre_raw": "barcelona"
+    },
+    {
+        "cod": "ma",
+        "nombre": "Madrid",
+        "nombre_raw": "madrid"
+    },
+    {
+        "cod": "mu",
+        "nombre": "Murcia",
+        "nombre_raw": "murcia"
+    },
+    {
+        "cod": "vd",
+        "nombre": "Palencia",
+        "nombre_raw": "palencia"
+    }
+]

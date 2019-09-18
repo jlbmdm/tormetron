@@ -15,11 +15,12 @@ import numpy as np
 import requests #Ver https://realpython.com/python-requests/
 #import urllib3
 #urllib3.disable_warnings()
-from osgeo import gdal, osr
 try:
-    import gdalconst
-except:
+    from osgeo import gdal, osr
     from osgeo import gdalconst
+except:
+    pass
+    #import gdal, osr, gdalconst
 
 try:
     from radatron import constants
@@ -35,6 +36,8 @@ BASE_DIR = os.path.abspath('.')
 PADRE_DIR = os.path.abspath('..') #Equivale a PADRE_DIR = os.path.abspath(r'../')
 WORK_DIR = RAIZ_DIR
 NODATA = -1
+DATA_DIR = 'radardata'
+LISTA_RADARES_FILE_NAME = 'cod_radar_regional.json'
 
 '''
 En principio no instancio directamente ningún objeto de esta clase
@@ -45,35 +48,57 @@ Estas dos funciones son metodos de la propia clase EstacionRadar
 pero podrian estar fuera de la clase
 '''
 class EstacionRadar:
-    """
+    '''
     Esta clase sirve para localizar un radar regional y solo tiene
     tres propiedades que son el cod, nombre y nombre_raw del radar
-    """
-    file_radares_name = os.path.join(FILE_DIR, 'data', 'cod_radar_regional.json')
-    if not os.path.exists(file_radares_name):
-        print('Falta el fichero de codigos de radar:', file_radares_name)
+    '''
+    lista_radares_file_name = os.path.join(FILE_DIR, DATA_DIR, LISTA_RADARES_FILE_NAME)
+    if not os.path.exists(lista_radares_file_name):
+        print('Falta el fichero de codigos de radar:', lista_radares_file_name)
         print('Reinstala la aplicación')
-        sys.exit()
-    with open(file_radares_name) as file_radares:
-        LISTA_RADAR = json.loads(file_radares.read())
+        sys.exit(1)
+    with open(lista_radares_file_name) as lista_radares_file:
+        LISTA_RADAR = json.loads(lista_radares_file.read())
         #LISTA_RADAR es una lista de dicts; cada dict es un radar
-        #con tres propiedades: cod, nombre y nombre_raw
+        #con tres claves: cod, nombre y nombre_raw
 
-    def __init__(self, cod='', nombre='', nombre_raw=''):
-        if cod != '' and (nombre == '' or nombre_raw == ''):
-            radar_buscado = True
+    def __init__(self, cod='', nombre='', buscar=True):
+        '''
+        Se puede instanciar la clase sin pasarle ningun argumento
+        o pasando una de estas tres kwargs:
+            cod        Codigo de una estacion radar
+            nombre:    Nombre de una estación radar
+                        Se admite nombre real y nombre siplificado (sin acentos ni mayusculas)
+        Si se instancia la clase sin argumentos, hay que usar el metodo
+            .buscar_estacion() para asignar la estación.
+        Si se instancia la clase con algún argumento indicativ de la estación,
+            se llama automáticamente al método .buscar_estacion() para verificar que existe.
+            Orden de prioridad de argumento a usar en la busqueda: cod, nombre
+        '''
+        if buscar and cod != '':
             radares_localizados = self.buscar_estacion(cod)
-        elif nombre != '' and nombre_raw == '':
+            if radares_localizados is None:
+                print('Revsar código porque radares_localizados es None')
+                sys.exit(1)
             radar_buscado = True
+            #Esto siguiente es un poco raro, porque creo un objeto de la clase
+            #desde dentr de la clase y lo asigno luego a self.
+            #Está copiado de lo que hace AEMET; yo no lo haría así:
+            #dejaría el método .buscar_estación() fuera de la clase
+            if nombre != '':
+                if not nombre in radares_localizados.nombre and\
+                    not nombre in radares_localizados.nombre_raw:
+                    print('Atención: el código no coincide con el nombre; se usa el código e ignra el nombre')
+        elif buscar and nombre != '':
             radares_localizados = self.buscar_estacion(nombre)
-        elif nombre_raw != '' and (cod == '' or nombre == ''):
             radar_buscado = True
-            radares_localizados = self.buscar_estacion(nombre_raw)
         else:
             radar_buscado = False
             self.cod = cod
             self.nombre = nombre
+            nombre_raw = nombre.lower().replace('á', 'a').replace('í', 'i')
             self.nombre_raw = nombre_raw
+
         if radar_buscado:
             if radares_localizados is None or len(radares_localizados) == 0:
                 print('Radar no encontrado. Escribe el nombre o codigo corecto. Nombres validos:')
@@ -82,16 +107,14 @@ class EstacionRadar:
                     print('\t', mi_lista_radar['nombre'])
                 quit()
             #Proceso solo el primero de la lista
-            radar_localizado = radares_localizados[0] #<class '__main__.EstacionRadar'>
-            self = radar_localizado
-            print('Radar localizado')
-            print('self.cod', self.cod)
-            print('self.nombre', self.nombre)
-            print('self.nombre_raw', self.nombre_raw)
-
-#             cod = radar_localizado.cod
-#             nombre = radar_localizado.nombre
-#             nombre_raw = radar_localizado.nombre_raw
+            if len(radares_localizados) > 1:
+                print('Lista de radares localizados:', end='\n')
+            else:
+                print('Radar localizados:', end=' ')
+            for radar_localizado in radares_localizados:
+                self = radares_localizados[0] #<class '__main__.EstacionRadar'>
+                print(f'\tRadar localizado: {self.nombre} {self.cod}')
+            #print('self.nombre_raw', self.nombre_raw)
 
     def __str__(self):
         return 'Estacion radar de {}: {} ({})'.format(self.nombre, self.cod, self.nombre_raw)
@@ -100,30 +123,42 @@ class EstacionRadar:
     def buscar_estacion(nombre_o_codigo):
         """
         Devuelve una lista con los resultados de la busqueda de radares
-        :param nombre: Nombre del radar
+        :param nombre_o_codigo: Nombre o código del radar
         """
         nombre_o_codigo_raw = nombre_o_codigo.lower().replace('á', 'a').replace('í', 'i')
         #print('nombre_raw', nombre_raw)
+        #Esto está copiado del ejemplo de AEMET: busqueda del radar de forma compacta
         try:
+            #Primero chequeo si coincide con algún oambre_raw
             radares_raw = list(filter(lambda t: nombre_o_codigo_raw in t.get('nombre_raw'), EstacionRadar.LISTA_RADAR))
             if len(radares_raw) == 0:
+                #Si eso falla, chequeso si coincide con algún codigo
                 radares_raw = list(filter(lambda t: nombre_o_codigo_raw in t.get('cod'), EstacionRadar.LISTA_RADAR))
                 if len(radares_raw) == 0:
                     return None
+            # radares_raw es una lista de 
             #print('EstacionRadar.LISTA_RADAR ->', type(EstacionRadar.LISTA_RADAR), type(EstacionRadar.LISTA_RADAR[0]), EstacionRadar.LISTA_RADAR)
-            #print('radares_raw               ->', type(radares_raw), type(radares_raw[0]), radares_raw)
-            lista_radares = list(map(lambda m: EstacionRadar.estacionRadar_from_jsonData(m), radares_raw))
-            #print('lista_radares             ->', type(lista_radares), type(lista_radares[0]), lista_radares)
-            return lista_radares
+            print('radar encontrado: radares_raw ->', type(radares_raw), type(radares_raw[0]), radares_raw)
         except:
             return None
+        #Esto esta copiado del ejemplo de AEMET: llama al metodo estacionRadar_from_jsonData() de esta clase
+        lista_radares = list(map(lambda m: EstacionRadar.estacionRadar_from_jsonData(m), radares_raw))
+        #Versión multilinea, sin lambda ni map()
+        #lista_radares = []
+        #for radar_raw in radares_raw:
+        #    lista_radares.append(EstacionRadar.estacionRadar_from_jsonData(radar_raw))
+        #print('lista_radares                 ->', type(lista_radares), type(lista_radares[0]), lista_radares)
+        return lista_radares
 
     @staticmethod
     def estacionRadar_from_jsonData(jsonData):
+        #print('jsonData:', type(jsonData), jsonData)
+        #print('cod    ->', jsonData.get('cod', ''))
+        #print('nombre ->', jsonData.get('nombre', ''))
         return EstacionRadar(
             cod=jsonData.get('cod', ''),
             nombre=jsonData.get('nombre', ''),
-            nombre_raw=jsonData.get('nombre_raw', '')
+            buscar=False
         )
 
 #Metodos del script de AEMET que no utilizo:
@@ -149,14 +184,17 @@ class EstacionRadar:
 
 
 class ImagenRadarAEMET:
-    def __init__(self, mi_radar, api_key=constants.API_KEY, api_key_file='', verbose=False):
+    def __init__(self, mi_radar, api_key=constants.API_KEY, api_key_file=constants.API_KEY_FILE, verbose=False):
         if not api_key and not api_key_file:
             print('Tienes que añadir una clave de API')
             api_key = self.guardar_clave_api()
         elif api_key_file:
+            if not os.path.exists(api_key_file):
+                print('No se encuentra', api_key_file, '-> revisar código')
             with open(api_key_file) as f:
                 api_key = f.read().strip()
         self.api_key = api_key
+        self.api_key_file = api_key_file
         self.querystring = {
             'api_key': self.api_key
         }
@@ -309,9 +347,13 @@ class ImagenRadarAEMET:
                 if self.verbose:
                     print(ahora, 'Respuesta de la API de opendata.aemet.es: API KEY ok')
                 img_url_ = r.json()['datos']
-            elif r.json()['descripcion'] =="datos expirados" or r.json()["estado"] == 404:
-                print('API KEY incorrecta')
-                quit()
+            elif r.json()['descripcion'] =="datos expirados" or\
+                 r.json()['descripcion'] == 'API key invalido' or\
+                 r.json()["estado"] == 404:
+                print('La API KEY es incorrecta')
+                if os.path.exists(self.api_key_file):
+                    print('Eliminar o modificar el fichero', self.api_key_file)
+                    sys.exit(2)
             else:
                 print('descripcion:', r.json()['descripcion'], 'estado:', r.json()["estado"])
                 print('Revisar http')
@@ -343,8 +385,11 @@ class ImagenRadarAEMET:
                 print('Imagen no disponible')
             else:
                 print('-->', r.headers['Content-Type'][:16])
-                
         except:
+            if r.json()['descripcion'] =="datos expirados" or\
+                 r.json()['descripcion'] == 'API key invalido' or\
+                 r.json()["estado"] == 404:
+                sys.exit(2)
             print('Error al descargar o guardar la imagen', out_file)
             return {
                 'status': r.json().get('estado', 'error'),
@@ -645,7 +690,7 @@ class ImagenRadarFile:
                 reading_band = reading_dataset.GetRasterBand(nBand+1)
             except:
                 print('Este raster no tiene la banda %i' % nBand)
-                sys.exit(1)
+                sys.exit(7)
             reading_band_asArrayInt = reading_band.ReadAsArray(xOffsetLectura,
                                                                yOffsetLectura, 
                                                                xPixelsLectura,

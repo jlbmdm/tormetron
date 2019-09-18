@@ -24,15 +24,17 @@ try:
     #    >>> import radatron     # importo el paquete (sus clases) desde el interpreta de python
     #    $ python -m radatron    # ejecuto el paquete con la opción -m (ejecuta su __main__.py)
     #REMOVE:\>
+    print('\nImport -> Intentando carga del paquete radatron desde __main__.py: import radatron')
     import radatron
-    print('Import radares from radatron ok (loading %s package)' % __name__)
+    print('Import radatron ok from __main__.py (loading as package %s)' % __name__)
 except:
     #REMOVE: quitar los comentarios y los print() al cargar los módulos
     #Esto funciona cuando este módulo se ejecuta de forma no ortodoxa:
     #    $ python __main__.py
     #REMOVE:\>
+    print('Como ha fallado import radatron, cargo el módulo radares con import radares as radatron')
     import radares as radatron
-    print('Import radares from __main__.py ok (loading %s package)' % __name__)
+    print('Import radares as radatron ok from __init__.py (loading as package %s)' % __name__)
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__)) #Equivale a FILE_DIR = pathlib.Path(__file__).parent
 WORK_DIR = os.path.abspath(os.path.join(FILE_DIR, '..'))
@@ -157,7 +159,7 @@ def descargarRadar(tipo_radar, dict_radar, modo, carpeta):
             numero_error = rpta['status']
             nombre_imagen_radar_orig_con_ruta = rpta['out_file']
             print('Error {} descargando o guardando: {}'.format(numero_error, nombre_imagen_radar_orig_con_ruta))
-            print('Revisar el codigo o la conexión a Internet')
+            print('Revisar el API_KEY, el codigo o la conexión a Internet')
             descargaOk = False
             #sys.exit(4)
 
@@ -243,7 +245,7 @@ def main(estacion='', radar='', modo='', carpeta=''):
             modo_solicitado = 'Opcion imposible'
     else:
         modo_solicitado = 'Descarga puntual'
-    print('Radar solicitado:', estacion_solicitada, '-', tipo_radar, '-', modo_solicitado, end=' - ')
+    print('Radar solicitado:', estacion_solicitada, '-', tipo_radar, '-', modo_solicitado, end=' -> ')
 
     lista_radares = radatron.EstacionRadar.buscar_estacion(estacion_solicitada) #<class 'list'>
     #print('lista_radares', lista_radares)

@@ -1,13 +1,20 @@
 import os
-from pathlib import Path
+import pathlib
+#from pathlib import Path
 
 # Constants
-HOME_DIR = str(Path.home())
 FILE_DIR = os.path.dirname(os.path.abspath(__file__)) #Equivale a FILE_DIR = pathlib.Path(__file__).parent
-RAIZ_DIR = os.path.abspath(os.path.join(FILE_DIR, '..'))
-BASE_DIR = os.path.abspath('.')
-PADRE_DIR = os.path.abspath('..') #Equivale a PADRE_DIR = os.path.abspath(r'../')
-WORK_DIR = RAIZ_DIR
+WORK_DIR = os.path.abspath(os.path.join(FILE_DIR, '..'))
+HOME_DIR = str(pathlib.Path.home())
+
+# RAIZ_DIR = os.path.abspath(os.path.join(FILE_DIR, '..'))
+
+# HOME_DIR = str(Path.home())
+# FILE_DIR = os.path.dirname(os.path.abspath(__file__)) #Equivale a FILE_DIR = pathlib.Path(__file__).parent
+# RAIZ_DIR = os.path.abspath(os.path.join(FILE_DIR, '..'))
+# BASE_DIR = os.path.abspath('.')
+# PADRE_DIR = os.path.abspath('..') #Equivale a PADRE_DIR = os.path.abspath(r'../')
+# WORK_DIR = RAIZ_DIR
 
 AEMET_DIR1 = os.path.join(HOME_DIR, '.aemet')
 AEMET_DIR2 = os.path.join(FILE_DIR, '.aemet')
@@ -17,15 +24,22 @@ if not os.path.exists(AEMET_DIR1) and not os.path.exists(AEMET_DIR2):
     os.mkdir(os.path.join(HOME_DIR, '.aemet'))
 API_KEY_FILE1 = os.path.join(HOME_DIR, '.aemet', 'api.key')
 API_KEY_FILE2 = os.path.join(FILE_DIR, '.aemet', 'api.key')
-try:
-    API_KEY = open(API_KEY_FILE1, 'r').read().strip()
-except:
-    API_KEY = ''
-if API_KEY == '':
+if os.path.exists(API_KEY_FILE1):
+    try:
+        API_KEY = open(API_KEY_FILE1, 'r').read().strip()
+        API_KEY_FILE = API_KEY_FILE1
+    except:
+        API_KEY = ''
+elif os.path.exists(API_KEY_FILE2):
     try:
         API_KEY = open(API_KEY_FILE2, 'r').read().strip()
+        API_KEY_FILE = API_KEY_FILE2
     except:
-        print('Fichero .../.aemet/api.key no encontrado')
+        API_KEY = ''
+else:
+    API_KEY = ''
+    API_KEY_FILE = ''
+    print(f'Fichero api.key no encontrado en {AEMET_DIR1} ni {AEMET_DIR2} -> Para descargar datos de la API de AEMET se solicitara entrada manual de API_KEY')
     
 # Endpoints
 BASE_URL = 'https://opendata.aemet.es/opendata/api'
