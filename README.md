@@ -29,7 +29,9 @@ o bien con el método antiguo (menos recomendable):
 
 ## Uso de tormetron
 
-Uso en linea de comandos:
+Para descargar imágenes de radar de la API de AEMET es necesario obtener antes una API_KEY de [AEMET](https://opendata.aemet.es/centrodedescargas/altaUsuario)
+
+# Uso en linea de comandos:
 
     $ python -m radatron [ options ]
     
@@ -58,11 +60,13 @@ Los comandos se puede abreviar respectivamente: -r, -e, -m, -c
 
 Para usarlo desde un script el paquete debe estar instalado en site-packages o estar disponible para el script:
 
->>> import radatron
+	>>> import radatron
 
->>> imagen_radar = radatron.ImagenRadarAEMET({'nombre':'Palencia'}, verbose=True)
+	>>> estacion_radar = radatron.EstacionRadar('Palencia')
 
->>> imagen_radar.descargar_mapa_radar_regional()
+	>>> imagen_radar = radatron.ImagenRadarAEMET(estacion_radar)
+
+	>>> imagen_radar.descargar_mapa_radar_regional()
 
 
 TODO: Pendiente completar las instrucciones
@@ -82,7 +86,7 @@ Las clases y sus métodos se documentarán próximamente.
 
 El script \_\_main\_\_.py utiliza estas clases para:
 
- * Obtener imagen rádar
+ * Obtener imagen(es) rádar
 
   o bien:
 
