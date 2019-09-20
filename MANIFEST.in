@@ -1,2 +1,6 @@
 include radatron/*.cfg
 include radatron/radardata/*.*
+global-exclude *.back
+global-exclude *.txt
+global-exclude pruebas.py
+global-exclude *.key

@@ -6,6 +6,12 @@ Created on 31 ago. 2019
 @author: joseb
 # -*- coding: UTF8 -*-
 # -*- coding: cp1252 -*-
+Subido a test.pypi con:
+    $ twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+Ver carga en pypi:
+    https://test.pypi.org/project/tormetron/0.0.1/
+Instalarlo con:
+    $ pip install -i https://test.pypi.org/simple/ tormetron==0.0.1
 '''
 import os, sys
 import pathlib
@@ -205,7 +211,9 @@ def descargarRadar(tipo_radar, estacion_radar, modo, carpeta):
         else:
             break
 
-
+#Ver
+#    https://stackoverflow.com/questions/9725675/is-there-a-standard-format-for-command-line-shell-help-text
+#para documentar el uso en linea de comandos en README.md
 @click.command()
 @click.option('-r', '--radar', default='1', prompt='Elige: (1): ultimo radar; (2) acum de las ultimas 6 horas', help='Descarga la última imagen del radar de AEMET')
 @click.option('-e', '--estacion', default='', help='Indica el nombre o codigo de la estacón radar. Por defecto, Palencia')

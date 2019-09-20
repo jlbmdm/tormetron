@@ -8,6 +8,8 @@ Created on 31 ago. 2019
 # -*- coding: cp1252 -*-
 '''
 
+__version__ = '0.0.1'
+
 #REMOVE: quitar los comentarios y los print() al cargar los módulos
 try:
     #Esto funciona cuando el módulo se carga al importar el paquete radatron:

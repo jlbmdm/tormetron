@@ -17,7 +17,7 @@ Se puede descargar tormetron de [PyPI](https://pypi.org/project/tormetron/):
 
 Tormetron funciona en Python 2.7 y en Python 3.5 y superior.
 
-Versión en desarrollo en github ([repositorio provisionalmente privado; se hará público con la versión 1.0.1](https://github.com/jlbmdm/tormetron))
+Versión en desarrollo en github ([repositorio provisionalmente privado; se hará público con la versión 1.0.0](https://github.com/jlbmdm/tormetron))
 
 Si se descarga el paquete desde github, se puede instalar en el site-packages de python desde el cmd, ubicandose en carpeta del proyecto en la que está el setup.py ($ cd ruta_del_proyecto), mediante:
 
