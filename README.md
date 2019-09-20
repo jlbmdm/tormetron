@@ -58,7 +58,9 @@ Los comandos se puede abreviar respectivamente: -r, -e, -m, -c
 		$ python -m radatron -r 2 -e Palencia -m c --carpeta radarPalencia
 
 
-Para usarlo desde un script el paquete debe estar instalado en site-packages o estar disponible para el script:
+### Uso desde un script de python:
+
+Para usarlo desde un script el paquete debe estar instalado en site-packages o estar disponible para el script de forma que pueda importarse el paquete radatron:
 
 	>>> import radatron
 
