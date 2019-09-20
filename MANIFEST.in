@@ -1,1 +1,2 @@
-include radarAEMET/*.cfg
+include radatron/*.cfg
+include radatron/radardata/*.*

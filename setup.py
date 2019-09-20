@@ -19,7 +19,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/jlbmdm/tormetron",
     author="Bengoa",
-    author_email="tormetron@gmail.com",
+    author_email="tratratron@gmail.com",
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
@@ -27,10 +27,16 @@ setup(
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
     ],
-    packages=["radarAEMET", "procesaRadar"],
+    packages=["radatron"],
     include_package_data=True,
     install_requires=[
-        "requests", "numpy", "osgeo", "osgeo.gdal", "osgeo.gdalconst", "PIL" 
+        "requests", "numpy", "gdal", "click"
     ],
-    entry_points={"console_scripts": ["tormetron=radarAEMET.__main__:main"]},
+    entry_points={"console_scripts": ["tormetron=radatron.__main__:main"]},
 )
+
+#Aviso: para incluir la carpeta radardata y otros ficheros uso el MANIFEST.in en lugar de la linea:
+#    package_data={'': ['README.md', 'LICENSE', 'radatron/radardata']},
+#Ver:
+# https://stackoverflow.com/questions/1612733/including-non-python-files-with-setup-py
+# https://stackoverflow.com/questions/1471994/what-is-setup-py

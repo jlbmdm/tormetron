@@ -3,8 +3,9 @@ Required packages:
     numpy
     osgeo (gdal gdalconst)
     click
-    PIL
-    #urllib3 (sin uso por el momento)
+    #PIL (sin uso por el momento)
+    #cv2 (opencv-python) (sin uso por el momento)
+    #urllib3(sin uso por el momento)
 
 Python imports:
     os

@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: cp1252 -*-
 '''
 Created on 31 ago. 2019
@@ -10,7 +9,9 @@ import os, sys
 import pathlib
 import json
 import datetime
+import unicodedata
 import math
+
 import numpy as np
 import requests #Ver https://realpython.com/python-requests/
 #import urllib3
@@ -40,12 +41,15 @@ DATA_DIR = 'radardata'
 LISTA_RADARES_FILE_NAME = 'cod_radar_regional.json'
 
 '''
-En principio no instancio directamente ningún objeto de esta clase
-con miEstacion = EstacionRadar(...). En su lugar lo hago desde el metodo
-buscar_estacion(...) que crea un objeto de la clase EstacionRadar
-usando la funcion estacionRadar_from_jsonData(...)
-Estas dos funciones son metodos de la propia clase EstacionRadar
-pero podrian estar fuera de la clase
+En principio no instancio directamente ningún objeto de esta clase con miEstacion = EstacionRadar(...).
+En su lugar lo hago desde el staticmethod EstacionRadar.buscar_estacion(...),
+que busca la estación radar en la lista y, si la encuentra, llama a otro staticmethod de esta clase,
+EstacionRadar.estacionRadar_from_jsonData(...), que crea una instancia de
+la clase EstacionRadar que se inicia con los atributos cod, nombre y nombre_raw
+También se podría crear una instancia de esta clase de forma más sencilla
+mediante, p. ej. mi_estacion = EstacionRadar(nombre='Palencia')
+Al instanciar la clase, el __init__() se encarga de verificar si existe 
+la estación solicitada (pasada como argumento cod o nombre)
 '''
 class EstacionRadar:
     '''
@@ -62,70 +66,110 @@ class EstacionRadar:
         #LISTA_RADAR es una lista de dicts; cada dict es un radar
         #con tres claves: cod, nombre y nombre_raw
 
-    def __init__(self, cod='', nombre='', buscar=True):
+    def __init__(self, nombre='', cod='', buscarradar=True):
         '''
-        Se puede instanciar la clase sin pasarle ningun argumento
-        o pasando una de estas tres kwargs:
-            cod        Codigo de una estacion radar
-            nombre:    Nombre de una estación radar
-                        Se admite nombre real y nombre siplificado (sin acentos ni mayusculas)
-        Si se instancia la clase sin argumentos, hay que usar el metodo
-            .buscar_estacion() para asignar la estación.
-        Si se instancia la clase con algún argumento indicativ de la estación,
-            se llama automáticamente al método .buscar_estacion() para verificar que existe.
-            Orden de prioridad de argumento a usar en la busqueda: cod, nombre
+        Devuelve una lista con los resultados de la busqueda de radares
+        :param cod:         Código de la estacion radar
+        :param nombre:      Nombre de la estacion radar
+        :param buscarradar: Si True, busca el nombre para verificar que existe y
+                            se corresponde con el código en la lista de radares
+        Si se instancia la clase sin argumentos, hay que usar posteriormente
+            el metodo .buscar_estacion() para asignar las propiedades (cod, nombre nombre_raw).
+        Si se instancia la clase pasándole solo el cod o solo el nombre de una estacion radar
+            se llama automáticamente al método .buscar_estacion() para verificar 
+            que existe y obtener el nombre o cod correspondiente
+        Si se instancia la clase indicando tanto el cod como el nombre:
+            Si buscarradar=True:  verifica que la cod y nombre corresponden a una estación
+            Si buscarradar=False: no se verifica nada; se asume que cod y nombre son correctos
         '''
-        if buscar and cod != '':
-            radares_localizados = self.buscar_estacion(cod)
-            if radares_localizados is None:
-                print('Revsar código porque radares_localizados es None')
-                sys.exit(1)
-            radar_buscado = True
-            #Esto siguiente es un poco raro, porque creo un objeto de la clase
-            #desde dentr de la clase y lo asigno luego a self.
-            #Está copiado de lo que hace AEMET; yo no lo haría así:
-            #dejaría el método .buscar_estación() fuera de la clase
-            if nombre != '':
-                if not nombre in radares_localizados.nombre and\
-                    not nombre in radares_localizados.nombre_raw:
-                    print('Atención: el código no coincide con el nombre; se usa el código e ignra el nombre')
-        elif buscar and nombre != '':
-            radares_localizados = self.buscar_estacion(nombre)
-            radar_buscado = True
-        else:
-            radar_buscado = False
+        cod_buscado_y_encontrado = False
+        nombre_buscado_y_encontrado = False
+        if (nombre != '' and cod != '' and not buscarradar) or\
+           (nombre == '' and cod == ''):
             self.cod = cod
             self.nombre = nombre
-            nombre_raw = nombre.lower().replace('á', 'a').replace('í', 'i')
-            self.nombre_raw = nombre_raw
-
-        if radar_buscado:
-            if radares_localizados is None or len(radares_localizados) == 0:
-                print('Radar no encontrado. Escribe el nombre o codigo corecto. Nombres validos:')
-                for mi_lista_radar in EstacionRadar.LISTA_RADAR:
-                    #TODO: arreglar para que muestre bien los acentos -> decode()
-                    print('\t', mi_lista_radar['nombre'])
-                quit()
-            #Proceso solo el primero de la lista
-            if len(radares_localizados) > 1:
-                print('Lista de radares localizados:', end='\n')
+        elif nombre != '' and (cod == '' or buscarradar):
+            radares_localizados = self.buscar_estacion(nombre)
+            if radares_localizados is None:
+                print('Nombre de estación radar no encontrado.')
+                if cod != '':
+                    radares_localizados = self.buscar_estacion(cod)
+                    if radares_localizados is None:
+                        print('Codigo de estación radar no encontrado.')
+                        self.cod = ''
+                        self.nombre = ''
+                        sys.exit(3)
+                    else:
+                        cod_buscado_y_encontrado = True
+                self.cod = ''
+                self.nombre = ''
+                sys.exit(3)
             else:
-                print('Radar localizados:', end=' ')
-            for radar_localizado in radares_localizados:
-                self = radares_localizados[0] #<class '__main__.EstacionRadar'>
-                print(f'\tRadar localizado: {self.nombre} {self.cod}')
-            #print('self.nombre_raw', self.nombre_raw)
+                nombre_buscado_y_encontrado = True
+                if cod != '':
+                    if not nombre in list(map(lambda e: e['nombre'], radares_localizados)):
+                        print('Atención: el código no coincide con el nombre; se usa el nombre e ignora el código')
+        elif cod != '':
+            radares_localizados = self.buscar_estacion(cod)
+            if radares_localizados is None:
+                print('Codigo de estación radar no encontrado.')
+                self.cod = ''
+                self.nombre = ''
+                sys.exit(3)
+            else:
+                cod_buscado_y_encontrado = True
+        else:
+            print('Esto no puede ocurrir')
+            sys.exit(3)
+
+        if cod_buscado_y_encontrado or nombre_buscado_y_encontrado:
+            if len(radares_localizados) == 1:
+                self.cod = radares_localizados[0]['cod']
+                self.nombre = radares_localizados[0]['nombre']
+                #print(f'Radar localizado: {radares_localizados[0]["nombre"]} ({radares_localizados[0]["cod"]})')
+                print(f'Radar localizado: {self}')
+            else:
+                print('Lista de radares localizados:', end='\n')
+                for radar_localizado in radares_localizados:
+                    print(f'\tRadar localizado: {radar_localizado["nombre"]} ({radar_localizado["cod"]})')
+                    if nombre != '' and cod != '':
+                        if radar_localizado['cod'] == cod and radar_localizado['nombre'] == nombre:
+                            self.cod = cod
+                            self.nombre = nombre
+                            break
+                    elif radar_localizado['nombre'] == nombre:
+                        self.cod = radar_localizado['cod']
+                        self.nombre = radar_localizado['nombre']
+                        if cod == '':
+                            break
+                    elif radar_localizado['cod'] == cod:
+                        self.cod = radar_localizado['cod']
+                        self.nombre = radar_localizado['nombre']
+                        if nombre == '':
+                            break
+        else:
+            print('Lista de radares disponibles:')
+            for mi_lista_radar in EstacionRadar.LISTA_RADAR:
+                #TODO: arreglar para que muestre bien los acentos -> decode()
+                print(f'\t {mi_lista_radar["nombre"]} ({mi_lista_radar["cod"]})')
+            quit()
+ 
+        nombre_raw = self.elimina_tildes(nombre).lower()
+        self.nombre_raw = nombre_raw
+
 
     def __str__(self):
-        return 'Estacion radar de {}: {} ({})'.format(self.nombre, self.cod, self.nombre_raw)
+        return 'Estacion radar de {} ({}) con codigo {}'.format(self.nombre, self.nombre_raw, self.cod)
 
     @staticmethod
-    def buscar_estacion(nombre_o_codigo):
+    def buscar_estacion(nombre_o_codigo, instanciar=False):
         """
         Devuelve una lista con los resultados de la busqueda de radares
         :param nombre_o_codigo: Nombre o código del radar
+        :param instanciar: si True devuelve una lista de instancias de la clase EstacionRadar
+                           si False devuelve una lista de dicts
         """
-        nombre_o_codigo_raw = nombre_o_codigo.lower().replace('á', 'a').replace('í', 'i')
+        nombre_o_codigo_raw = EstacionRadar.elimina_tildes(nombre_o_codigo).lower()
         #print('nombre_raw', nombre_raw)
         #Esto está copiado del ejemplo de AEMET: busqueda del radar de forma compacta
         try:
@@ -138,16 +182,20 @@ class EstacionRadar:
                     return None
             # radares_raw es una lista de 
             #print('EstacionRadar.LISTA_RADAR ->', type(EstacionRadar.LISTA_RADAR), type(EstacionRadar.LISTA_RADAR[0]), EstacionRadar.LISTA_RADAR)
-            print('radar encontrado: radares_raw ->', type(radares_raw), type(radares_raw[0]), radares_raw)
+            #print('radar encontrado: radares_raw ->', type(radares_raw), type(radares_raw[0]), radares_raw)
         except:
             return None
-        #Esto esta copiado del ejemplo de AEMET: llama al metodo estacionRadar_from_jsonData() de esta clase
-        lista_radares = list(map(lambda m: EstacionRadar.estacionRadar_from_jsonData(m), radares_raw))
-        #Versión multilinea, sin lambda ni map()
-        #lista_radares = []
-        #for radar_raw in radares_raw:
-        #    lista_radares.append(EstacionRadar.estacionRadar_from_jsonData(radar_raw))
-        #print('lista_radares                 ->', type(lista_radares), type(lista_radares[0]), lista_radares)
+        if instanciar:
+            #Esto no lo voy a usar:
+            #Esto esta copiado del ejemplo de AEMET: llama al metodo estacionRadar_from_jsonData() de esta clase
+            lista_radares = list(map(lambda m: EstacionRadar.estacionRadar_from_jsonData(m), radares_raw))
+            #Versión multilinea, sin lambda ni map()
+            #lista_radares = []
+            #for radar_raw in radares_raw:
+            #    lista_radares.append(EstacionRadar.estacionRadar_from_jsonData(radar_raw))
+        else:
+            lista_radares = radares_raw
+        #print('lista_radares ->', type(lista_radares), type(lista_radares[0]), lista_radares)
         return lista_radares
 
     @staticmethod
@@ -156,11 +204,15 @@ class EstacionRadar:
         #print('cod    ->', jsonData.get('cod', ''))
         #print('nombre ->', jsonData.get('nombre', ''))
         return EstacionRadar(
-            cod=jsonData.get('cod', ''),
             nombre=jsonData.get('nombre', ''),
-            buscar=False
+            cod=jsonData.get('cod', ''),
+            buscarradar=False
         )
 
+    @staticmethod
+    def elimina_tildes(cadena):
+        s = ''.join((c for c in unicodedata.normalize('NFD',cadena) if unicodedata.category(c) != 'Mn'))
+        return s
 #Metodos del script de AEMET que no utilizo:
 #     @staticmethod
 #     def get_estacion(id):
@@ -184,7 +236,7 @@ class EstacionRadar:
 
 
 class ImagenRadarAEMET:
-    def __init__(self, mi_radar, api_key=constants.API_KEY, api_key_file=constants.API_KEY_FILE, verbose=False):
+    def __init__(self, estacion_radar, api_key=constants.API_KEY, api_key_file=constants.API_KEY_FILE, verbose=False):
         if not api_key and not api_key_file:
             print('Tienes que añadir una clave de API')
             api_key = self.guardar_clave_api()
@@ -198,7 +250,7 @@ class ImagenRadarAEMET:
         self.querystring = {
             'api_key': self.api_key
         }
-        self.mi_radar = mi_radar
+        self.estacion_radar = estacion_radar
         self.headers = {}
         self.verbose = verbose
         #print('api_key', self.api_key)
@@ -519,18 +571,18 @@ class ImagenRadarAEMET:
                 return {'status': 600, 'out_file': archivo_salida}
         return self.download_image_from_url(url_imagen_radar, archivo_salida)
 
-    def descargar_mapa_radar_regional(self, ruta_orig='', cod_est='vd', nombre_est=''):
+    def descargar_mapa_radar_regional(self, ruta_orig=''):
         """
         Descarga una imagen con el mapa del radar por región
-        :param ruta_orig: Ruta en la que se guardan las imagenes
-        :param cod_estacion: Codigo de estacion regional consultada
-        :param nombre_raw_estacion: Nombre de estacion regional consultada (sin mayusculas, espacios ni acentos)
+        :param ruta_orig: Ruta en la que se guardan las imagenes descargadas
         """
-        url_imagen_radar = constants.RADAR_REGIONAL_API_URL.format(cod_est)
-        if nombre_est == '':
-            nombre_est = cod_est
+        url_imagen_radar = constants.RADAR_REGIONAL_API_URL.format(self.estacion_radar.cod)
+        if self.estacion_radar.cod == '':
+            return {'status': 700, 'out_file': 'EstacionSinCodigo1'}
+        elif self.estacion_radar.nombre == '':
+            self.estacion_radar.nombre = self.estacion_radar.cod
         ahora = str(datetime.datetime.now()).replace(' ', '_').replace(':', 'h')[:16]
-        nombre_imagen_radar_orig = f'AEMET_radar_{nombre_est}_{ahora}.png'
+        nombre_imagen_radar_orig = f'AEMET_radar_{self.estacion_radar.nombre}_{ahora}.png'
         nombre_imagen_radar_orig_con_ruta = os.path.join(ruta_orig, nombre_imagen_radar_orig)
         if os.path.exists(nombre_imagen_radar_orig_con_ruta):
             print('La imagen', nombre_imagen_radar_orig_con_ruta, 'ya existe: se sobreescribe')
@@ -540,28 +592,26 @@ class ImagenRadarAEMET:
                 return {'status': 600, 'out_file': [nombre_imagen_radar_orig_con_ruta]}
         return self.download_image_from_url(url_imagen_radar, nombre_imagen_radar_orig_con_ruta)
 
-    def descargar_mapa_radar_regional_6h(self, ruta_orig='', cod_est='vd', nombre_est='',
-                                         urlRadarAcum6h='', urlRadarAcum6h_ref1='', urlRadarAcum6h_ref2=''):
-
+    def descargar_mapa_radar_regional_6h(self, ruta_orig='', urlRadarAcum6h='', urlRadarAcum6h_ref1='', urlRadarAcum6h_ref2=''):
         """
         Descarga las imagenes de un dia determinado de precipitacion acumulada en 6 h
-        :param ruta_orig: Ruta en la que se guardan las imagenes
-        :param cod_est: Código de dos letras de la estacion radar
-        :param nombre_est: Nombre de la estacion sin acentos ni mayusculas
+        :param ruta_orig: Ruta en la que se guardan las imagenes descargadas
         """
-        if nombre_est == '':
-            nombre_est = cod_est
+        if self.estacion_radar.cod == '':
+            return {'status': 700, 'out_file': 'EstacionSinCodigo2'}
+        elif self.estacion_radar.nombre == '':
+            self.estacion_radar.nombre = self.estacion_radar.cod
 
         if urlRadarAcum6h != '':
-            urlRadarAcum6hCompleto = urlRadarAcum6h.format(cod_est)
+            urlRadarAcum6hCompleto = urlRadarAcum6h.format(self.estacion_radar.cod)
         else:
-            urlRadarAcum6hCompleto = 'http://www.aemet.es/es/eltiempo/observacion/radar?w=1&p={}&opc1=3'.format(cod_est)
+            urlRadarAcum6hCompleto = 'http://www.aemet.es/es/eltiempo/observacion/radar?w=1&p={}&opc1=3'.format(self.estacion_radar.cod)
         if urlRadarAcum6h_ref1 == '':
             urlRadarAcum6h_ref1 = '<div id="imagen%i" class="item">'
         if urlRadarAcum6h_ref2 == '':
             urlRadarAcum6h_ref2 = '<img class="lazyOwl" data-src="'
 
-        nombre_Imagen_acum6h = f'AEMET_radarAcum6h_{nombre_est}.gif'
+        nombre_Imagen_acum6h = f'AEMET_radarAcum6h_{self.estacion_radar.nombre}.gif'
         nombre_Imagen_acum6h_con_ruta = os.path.join(ruta_orig, nombre_Imagen_acum6h)
         return self.download_image_from_web_page(urlRadarAcum6hCompleto, nombre_Imagen_acum6h_con_ruta,
                                                  urlRadarAcum6h_ref1=urlRadarAcum6h_ref1,
@@ -585,15 +635,23 @@ class ImagenRadarFile:
         self.nombre_imagen_radar_tif_con_ruta = nombre_imagen_radar_tif_con_ruta
         self.nombre_imagen_radar_asc_con_ruta = nombre_imagen_radar_asc_con_ruta
         self.tipo_imagen = tipo_imagen
+        self.src_dataset = None
+        self.ok = True
         self.verbose = verbose
+        if not os.path.exists(self.nombre_imagen_radar_orig_con_ruta):
+            print('La imagen', self.nombre_imagen_radar_orig_con_ruta, 'no existe: revisar el error')
+            self.ok = False
+            sys.exit(5)
 
-    def georeferenciarImagenRadar(self):
+
+    def georeferenciar_imagen_radar(self):
         '''
         Georreferencia una imagen radar (implementado solo para el radar de Palencia)
         '''
         if self.tipo_imagen != 'radar' and self.tipo_imagen != 'acum6h':
             print('\nAplicacion no preparada para interpretar otras imagenes que no sean de radar y precipitacion acumlada de 6 horas')
-            sys.exit(9)
+            self.ok = False
+            sys.exit(0)
         formato = "GTiff"
         driver = gdal.GetDriverByName( formato )
         if os.path.exists(self.nombre_imagen_radar_tif_con_ruta):
@@ -601,15 +659,22 @@ class ImagenRadarFile:
             try:
                 os.remove(self.nombre_imagen_radar_tif_con_ruta)
             except:
-                print('No se ha posido eliminar la imagen', self.nombre_imagen_radar_tif_con_ruta, 'revisar si esta bloqueada por el sistema operativo')
-                sys.exit(5)
-        try:
-            self.src_dataset = gdal.Open(self.nombre_imagen_radar_orig_con_ruta)
-            if self.src_dataset is None:
-                print('Error abriendo', self.nombre_imagen_radar_orig_con_ruta)
-        except:
-                print('Error abriendo', self.nombre_imagen_radar_orig_con_ruta)
-                sys.exit(4)
+                print('No se ha podido eliminar la imagen', self.nombre_imagen_radar_tif_con_ruta, 'revisar si esta bloqueada por el sistema operativo')
+                self.ok = False
+                sys.exit(6)
+        if self.ok:
+            try:
+                self.src_dataset = gdal.Open(self.nombre_imagen_radar_orig_con_ruta)
+                if self.src_dataset is None:
+                    print('Error abriendo', self.nombre_imagen_radar_orig_con_ruta, '-> self.src_dataset is None')
+                    self.ok = False
+            except:
+                print('Error abriendo', self.nombre_imagen_radar_orig_con_ruta, '-> No se puede abrir la imagen')
+                self.ok = False
+                sys.exit(7)
+
+        if not self.ok:
+            return
 
         nCeldasX = self.src_dataset.RasterXSize
         nCeldasY = self.src_dataset.RasterYSize
@@ -626,7 +691,9 @@ class ImagenRadarFile:
             outputDataset = driver.CreateCopy(self.nombre_imagen_radar_tif_con_ruta, self.src_dataset, 0, outputOptions)
         except:
             print('No se ha podido crear la imagen', self.nombre_imagen_radar_tif_con_ruta, 'revisar si hay restricciones para escribir en la ruta de destino')
-            sys.exit(5)
+            self.ok = False
+            sys.exit(8)
+            return
         outputDataset.SetGeoTransform( [XsupIzda, ancho_pixel, SesgoEnX, YsupIzda, SesgoEnY, alto_pixel ] )
         #Nota:
         # Xgeo = GT(0) + Xpixel*GT(1) + Yline*GT(2)
@@ -643,15 +710,26 @@ class ImagenRadarFile:
         if self.verbose:
             print('Imagen reproyectada ok')
 
+
     def guardar_raster_asc(self, nBandas=0):
         '''
-        :param nBandas: Numero de bandas que se quiere procesar: indicar 0 si se quieren procesar todas las que tenga el raster. 
+        Convierte una imagen (self.nombre_imagen_radar_tif_con_ruta)
+        al formato asc leyendo secuencialmente su contenido (filas, columnas)
+        y convirtiendo sus valores en valores o rangos de precipitación
+        usando como referencia el patron de colores que AEMET incluye en la imagen
+        :param nBandas: Numero de bandas que se quiere procesar.
+                        0 -> procesar todas las bandas que tenga el raster. 
         '''
+        if self.tipo_imagen != 'radar' and self.tipo_imagen != 'acum6h':
+            print('\nAplicacion no preparada para interpretar otras imagenes que no sean de radar y precipitacion acumlada de 6 horas')
+            self.ok = False
+            sys.exit(0)
         reading_filename = self.nombre_imagen_radar_tif_con_ruta
         reading_dataset = gdal.Open( reading_filename, gdalconst.GA_ReadOnly )
         if reading_dataset is None:
             print('Error abriendo raster', reading_filename)
-            sys.exit(5)
+            self.ok = False
+            sys.exit(9)
         nCeldasX = reading_dataset.RasterXSize
         nCeldasY = reading_dataset.RasterYSize
         if nBandas == 0:
@@ -683,14 +761,15 @@ class ImagenRadarFile:
         xOffsetLectura, yOffsetLectura = 0, 0
         xPixelsLectura, yPixelsLectura = nCeldasX, nCeldasY
 
-        reading_band_asArrayIntDictOld = {} #Incluto este array por si hubiera varias bandas (no es el caso)
-        reading_band_asArrayIntDictNew = {} #Incluto este array por si hubiera varias bandas (no es el caso)
+        reading_band_asArrayIntDictOld = {} #Usaría este array si hubiera varias bandas (no es el caso)
+        reading_band_asArrayIntDictNew = {} #Usaría este array si hubiera varias bandas (no es el caso)
         for nBand in range(nBandas):
             try:
                 reading_band = reading_dataset.GetRasterBand(nBand+1)
             except:
                 print('Este raster no tiene la banda %i' % nBand)
-                sys.exit(7)
+                self.ok = False
+                sys.exit(10)
             reading_band_asArrayInt = reading_band.ReadAsArray(xOffsetLectura,
                                                                yOffsetLectura, 
                                                                xPixelsLectura,
@@ -698,7 +777,7 @@ class ImagenRadarFile:
             #El nuevo array tiene:
             nRows = reading_band_asArrayInt.shape[0] #-> yPixelsLectura
             nCols = reading_band_asArrayInt.shape[1] #-> xPixelsLectura
-            #Aplico la deformación (sesgo en x e y
+            #Aplico la deformación (sesgo en x e y)
             xPixelsNew = xPixelsLectura + math.ceil(sesgoX * yPixelsLectura / ancho_pixel) + 1
             yPixelsNew = yPixelsLectura + math.ceil(sesgoY * xPixelsLectura / abs(alto_pixel)) + 1
             nRowsNew = yPixelsNew
@@ -714,6 +793,7 @@ class ImagenRadarFile:
             reading_band_asArrayIntDictOld[nBand] = reading_band_asArrayInt
             reading_band_asArrayIntDictNew[nBand] = reading_band_asArrayIntNew
 
+        #Ubicación de la leyenda de colores que permite convertir colores en rangos de preciptación o reflectividad
         if self.tipo_imagen == 'radar':
             listaValoresPrecipitacion = [12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72] #En realidad son valores de reflectividad
             colInicial = 506
@@ -730,10 +810,8 @@ class ImagenRadarFile:
             nCeldasPorColor = 32
             if self.verbose:
                 print('\nGuardo la precipitacion en las ultimas 6 horas en un fichero ASC')
-        else:
-            print('\nAplicacion no preparada para interpretar otras imagenes que no sean de radar y precipitacion acumlada de 6 horas')
-            sys.exit(9)
 
+        #Leo la leyenda de colores
         dictRangoCeldasPorValorPrecipitacion = {}
         dictListaColoresPorValorPrecipitacion = {}
         for valorPrecipitacion in listaValoresPrecipitacion:
@@ -751,8 +829,9 @@ class ImagenRadarFile:
                             print('Precipitacion/Reflectividad', valorPrecipitacion, 'Color', codigoColor)
 
         for nBand in range(nBandas):
+            #REMOVE
             if False:
-                #Lineas de uso interno para ver las celdas con los codigos de coor en la imagen original
+                #Lineas de uso interno para ver las celdas con los codigos de color en la imagen original
                 target_ascfile_name_orginal = self.nombre_imagen_radar_asc_con_ruta.replace('.asc', '_banda%i_original.txt' % nBand)
                 target_ascfile_opened = open(target_ascfile_name_orginal, 'w+')
                 for row in range(nRows):
@@ -761,6 +840,7 @@ class ImagenRadarFile:
                         target_ascfile_opened.write('%03i ' % valor)
                     target_ascfile_opened.write('\n')
                 target_ascfile_opened.close
+            #REMOVE\>
 
             if nBandas <= 1:
                 target_ascfile_name_georef = self.nombre_imagen_radar_asc_con_ruta
@@ -771,8 +851,9 @@ class ImagenRadarFile:
                 try:
                     os.remove(target_ascfile_name_georef)
                 except:
-                    print('No se ha posido eliminar la imagen', target_ascfile_name_georef, 'revisar si esta bloqueada por el sistema operativo')
-                    sys.exit(5)
+                    print('No se ha podido eliminar la imagen', target_ascfile_name_georef, 'revisar si esta bloqueada por el sistema operativo')
+                    self.ok = False
+                    sys.exit(6)
             target_ascfile_opened = open(target_ascfile_name_georef, 'w+')
             target_ascfile_opened.write('ncols %i \n' % (xPixelsNew))
             target_ascfile_opened.write('nrows %i \n' % (yPixelsNew))
@@ -787,6 +868,7 @@ class ImagenRadarFile:
                     for valorPrecipitacion in listaValoresPrecipitacion:
                         if codigoColor in dictListaColoresPorValorPrecipitacion[valorPrecipitacion]:
                             valor = valorPrecipitacion
+                            break
                     target_ascfile_opened.write('%03i ' % valor)
                 target_ascfile_opened.write('\n')
             target_ascfile_opened.close

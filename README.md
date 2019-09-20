@@ -1,18 +1,30 @@
 # Tormetron
 
-hola prueba2
+Tormetron es un paquete destinado a descargar y procesar imágenes ofrecidas por AEMET (www.aemet.es) referentes a:
 
-Tormetron es un paquete destinado a descargar y procesar imágenes del radar de precipitación o de imágenes con la precipitación de 6 horas de [AEMET](www.aemet.es) usando la API de AEMET ([aemet open data](https://opendata.aemet.es/).)
+  Radares de precipitación. Fuente:  API de AEMET ([aemet open data](https://opendata.aemet.es/).)
+  Precipitación acumulada de 6 horas. Fuente: web de AEMET ([aemet radar](http://www.aemet.es/es/eltiempo/observacion/radar) [aemet precipitacion acumulada de 6 horas; radar de Palencia]http://www.aemet.es/es/eltiempo/observacion/radar?w=1&p=vd&opc1=3.)
+  
+Página web en preparación [tormetron](https://tormetron.com/).
 
-Para más información consultar: [tormetron](https://tormetron.com/).
 
-## Installation
+## Descarga e instalación
 
 Se puede descargar tormetron de [PyPI](https://pypi.org/project/tormetron/):
 
     pip install tormetron
 
 Tormetron funciona en Python 2.7 y en Python 3.5 y superior.
+
+Versión en desarrollo en github [github - repositorio provisionalmente privado; se hará público con la versión 1.0.1](https://github.com/jlbmdm/tormetron)
+
+Si se ha descargado el paquete desde github, se puede instalar en el site-packages de python desde el cmd, carpeta del proyecto, en la que está el setup.py, mediante:
+
+    $ pip install .
+
+o bien con el método antiguo (menos recomendable):
+
+    $ python setup.py install
 
 ## Uso de tormetron
 
@@ -35,35 +47,32 @@ Uso en linea de comandos:
     
     $ python -m radatron -r 2 -e Palencia -m c --carpeta radarPalencia
 
-Uso desde un script:
+Para usarlo desde un script el paquete debe estar instalado en site-packages o estar disponible para el script:
 >>> import radatron
 >>> imagen_radar = radatron.ImagenRadarAEMET({'nombre':'Palencia'}, verbose=True)
 >>> imagen_radar.descargar_mapa_radar_regional()
 
-TODO: completar las instrucciones
+TODO: Pendiente completar las instrucciones
+
 
 ## Organización interna
 
 Tormetron incluye un paquete llamado __radatron__ con un módulo principal, _radares.py_, que tiene tres clases:
 
-  Class EstacionRadar     -> Lista de estaciones radar de AEMET. Tiene el método para localizar una estación a partir de su nombre o código:
+  Class EstacionRadar     -> Incluye métodos para buscar/identificar una estación radar
   
-    buscar_estacion(nombre_o_codigo)
-
-  Class ImagenRadarAEMET  -> Con métodos para descargar imágenes radar:
-  
-    descargar_mapa_radar_nacional(archivo_salida)
-    descargar_mapa_radar_regional(ruta_orig, cod_est, nombre_est)
-    descargar_mapa_radar_regional_6h(ruta_orig, cod_est', nombre_est, urlRadarAcum6h, urlRadarAcum6h_ref1, urlRadarAcum6h_ref2)
+  Class ImagenRadarAEMET  -> Incluye métodos para descargar imágenes radar de AEMET:
 
   Class ImagenRadarFile   -> Con métodos para procesar georreferenciar imágenes descargadas:
-  
-    georeferenciarImagenRadar()
-    guardar_raster_asc(nBandas)
+
+Las clases ys sus métodos se documentarán próximamente.
 
 El script __main__.py utiliza estas clases para:
 
     $ Obtener imagen rádar
+
+  o bien:
+
     $ Obtener imagen de precipitación de las últimas 6 horas
     
     En ambos casos se puede descargar:

@@ -22,6 +22,9 @@ AEMET_DIR2 = os.path.join(FILE_DIR, '.aemet')
 if not os.path.exists(AEMET_DIR1) and not os.path.exists(AEMET_DIR2):
     # Create ~/.aemet config dir
     os.mkdir(os.path.join(HOME_DIR, '.aemet'))
+
+#Obtención del API_KEY en:
+#  https://opendata.aemet.es/centrodedescargas/altaUsuario
 API_KEY_FILE1 = os.path.join(HOME_DIR, '.aemet', 'api.key')
 API_KEY_FILE2 = os.path.join(FILE_DIR, '.aemet', 'api.key')
 if os.path.exists(API_KEY_FILE1):
@@ -39,7 +42,9 @@ elif os.path.exists(API_KEY_FILE2):
 else:
     API_KEY = ''
     API_KEY_FILE = ''
-    print(f'Fichero api.key no encontrado en {AEMET_DIR1} ni {AEMET_DIR2} -> Para descargar datos de la API de AEMET se solicitara entrada manual de API_KEY')
+    print(f'Fichero api.key no encontrado en {AEMET_DIR1} ni {AEMET_DIR2}')
+    print('Cuando se descarguen datos de la API de AEMET se solicitará entrada manual de API_KEY')
+    print('Para obtener una APY_KEY ir a: https://opendata.aemet.es/centrodedescargas/altaUsuario')
     
 # Endpoints
 BASE_URL = 'https://opendata.aemet.es/opendata/api'
