@@ -114,27 +114,6 @@ if not config_ok:
     config_dict['urlRadarAcum6h_ref2'] = '<img class="lazyOwl" data-src="'
 
 
-def habilitar_rutas(carpeta):
-    ruta_imagenes_radar = os.path.join(WORK_DIR, carpeta)
-    if not os.path.exists(ruta_imagenes_radar):
-        #print( 'No existe el directorio %s -> Se crea automaticamente' % (ruta_imagenes_radar) )
-        try:
-            os.makedirs(ruta_imagenes_radar)
-        except:
-            print( 'No se ha podido crear el directorio %s' % (ruta_imagenes_radar) )
-            sys.exit(0)
-    ruta_orig = os.path.join(ruta_imagenes_radar, 'orig')
-    if not os.path.exists(ruta_orig):
-        os.makedirs(ruta_orig)
-    ruta_tif = os.path.join(ruta_imagenes_radar, 'tif')
-    if not os.path.exists(ruta_tif):
-        os.makedirs(ruta_tif)
-    ruta_asc = os.path.join(ruta_imagenes_radar, 'asc')
-    if not os.path.exists(ruta_asc):
-        os.makedirs(ruta_asc)
-    return ruta_orig, ruta_tif, ruta_asc
-
-
 def descargarRadar(tipo_radar, estacion_radar, modo, carpeta):
     '''
     Lanza la descarga de las imagenes radar o acum6h usando el paquete radatron 
@@ -143,7 +122,8 @@ def descargarRadar(tipo_radar, estacion_radar, modo, carpeta):
     :param modo:           "c": para descarga continua; "p" (resto): descarga puntual
     :param carpeta:        Nombre de la carpeta en la que guardar las imágenes
     '''
-    ruta_orig, ruta_tif, ruta_asc = habilitar_rutas(carpeta)
+    ruta_imagenes_radar = os.path.join(WORK_DIR, carpeta)
+    ruta_orig, ruta_tif, ruta_asc = radatron.ImagenRadarAEMET.habilitar_rutas(ruta_imagenes_radar)
     descargas_exitosas = 0
     descargas_fallidas = 0
     imagen_radar = radatron.ImagenRadarAEMET(estacion_radar, verbose=VERBOSE)

@@ -1,3 +1,11 @@
+# -*- coding: cp1252 -*-
+'''
+Created on 31 ago. 2019
+
+@author: joseb
+API de AEMET: https://opendata.aemet.es/centrodedescargas/AEMETApi
+'''
+
 import os
 import pathlib
 #from pathlib import Path

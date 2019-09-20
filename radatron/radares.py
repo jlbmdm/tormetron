@@ -88,6 +88,7 @@ class EstacionRadar:
            (nombre == '' and cod == ''):
             self.cod = cod
             self.nombre = nombre
+            self.nombre_raw = self.elimina_tildes(self.nombre).lower()
         elif nombre != '' and (cod == '' or buscarradar):
             radares_localizados = self.buscar_estacion(nombre)
             if radares_localizados is None:
@@ -98,11 +99,13 @@ class EstacionRadar:
                         print('Codigo de estación radar no encontrado.')
                         self.cod = ''
                         self.nombre = ''
+                        self.nombre_raw = ''
                         sys.exit(3)
                     else:
                         cod_buscado_y_encontrado = True
                 self.cod = ''
                 self.nombre = ''
+                self.nombre_raw = ''
                 sys.exit(3)
             else:
                 nombre_buscado_y_encontrado = True
@@ -115,6 +118,7 @@ class EstacionRadar:
                 print('Codigo de estación radar no encontrado.')
                 self.cod = ''
                 self.nombre = ''
+                self.nombre_raw = ''
                 sys.exit(3)
             else:
                 cod_buscado_y_encontrado = True
@@ -126,6 +130,7 @@ class EstacionRadar:
             if len(radares_localizados) == 1:
                 self.cod = radares_localizados[0]['cod']
                 self.nombre = radares_localizados[0]['nombre']
+                self.nombre_raw = self.elimina_tildes(self.nombre).lower()
                 #print(f'Radar localizado: {radares_localizados[0]["nombre"]} ({radares_localizados[0]["cod"]})')
                 print(f'Radar localizado: {self}')
             else:
@@ -136,15 +141,18 @@ class EstacionRadar:
                         if radar_localizado['cod'] == cod and radar_localizado['nombre'] == nombre:
                             self.cod = cod
                             self.nombre = nombre
+                            self.nombre_raw = self.elimina_tildes(self.nombre).lower()
                             break
                     elif radar_localizado['nombre'] == nombre:
                         self.cod = radar_localizado['cod']
                         self.nombre = radar_localizado['nombre']
+                        self.nombre_raw = self.elimina_tildes(self.nombre).lower()
                         if cod == '':
                             break
                     elif radar_localizado['cod'] == cod:
                         self.cod = radar_localizado['cod']
                         self.nombre = radar_localizado['nombre']
+                        self.nombre_raw = self.elimina_tildes(self.nombre).lower()
                         if nombre == '':
                             break
         else:
@@ -154,12 +162,11 @@ class EstacionRadar:
                 print(f'\t {mi_lista_radar["nombre"]} ({mi_lista_radar["cod"]})')
             quit()
  
-        nombre_raw = self.elimina_tildes(nombre).lower()
-        self.nombre_raw = nombre_raw
 
 
     def __str__(self):
         return 'Estacion radar de {} ({}) con codigo {}'.format(self.nombre, self.nombre_raw, self.cod)
+
 
     @staticmethod
     def buscar_estacion(nombre_o_codigo, instanciar=False):
@@ -269,6 +276,27 @@ class ImagenRadarAEMET:
                 f.write(api_key)
             print('No se puede escribir en {}. Clave de API almacenada en {}'.format(constants.API_KEY_FILE1, constants.API_KEY_FILE2))
         return api_key
+
+    @staticmethod
+    def habilitar_rutas(ruta_imagenes_radar, subcarpetas=True):
+        if not os.path.exists(ruta_imagenes_radar):
+            #print( 'No existe el directorio %s -> Se crea automaticamente' % (ruta_imagenes_radar) )
+            try:
+                os.makedirs(ruta_imagenes_radar)
+            except:
+                print( 'No se ha podido crear el directorio %s' % (ruta_imagenes_radar) )
+                sys.exit(0)
+        if subcarpetas:
+            ruta_orig = os.path.join(ruta_imagenes_radar, 'orig')
+            if not os.path.exists(ruta_orig):
+                os.makedirs(ruta_orig)
+            ruta_tif = os.path.join(ruta_imagenes_radar, 'tif')
+            if not os.path.exists(ruta_tif):
+                os.makedirs(ruta_tif)
+            ruta_asc = os.path.join(ruta_imagenes_radar, 'asc')
+            if not os.path.exists(ruta_asc):
+                os.makedirs(ruta_asc)
+            return ruta_orig, ruta_tif, ruta_asc
 
     def get_request_data(self, url, todos=False):
         """
@@ -571,11 +599,12 @@ class ImagenRadarAEMET:
                 return {'status': 600, 'out_file': archivo_salida}
         return self.download_image_from_url(url_imagen_radar, archivo_salida)
 
-    def descargar_mapa_radar_regional(self, ruta_orig=''):
+    def descargar_mapa_radar_regional(self, ruta_orig=os.path.join(HOME_DIR, 'tormetron/data')):
         """
         Descarga una imagen con el mapa del radar por región
         :param ruta_orig: Ruta en la que se guardan las imagenes descargadas
         """
+        self.habilitar_rutas(ruta_orig, subcarpetas=False)
         url_imagen_radar = constants.RADAR_REGIONAL_API_URL.format(self.estacion_radar.cod)
         if self.estacion_radar.cod == '':
             return {'status': 700, 'out_file': 'EstacionSinCodigo1'}
@@ -592,11 +621,15 @@ class ImagenRadarAEMET:
                 return {'status': 600, 'out_file': [nombre_imagen_radar_orig_con_ruta]}
         return self.download_image_from_url(url_imagen_radar, nombre_imagen_radar_orig_con_ruta)
 
-    def descargar_mapa_radar_regional_6h(self, ruta_orig='', urlRadarAcum6h='', urlRadarAcum6h_ref1='', urlRadarAcum6h_ref2=''):
+    def descargar_mapa_radar_regional_6h(self, ruta_orig=os.path.join(HOME_DIR, 'tormetron/data'),
+                                         urlRadarAcum6h='http://www.aemet.es/es/eltiempo/observacion/radar?w=1&p={}&opc1=3',
+                                         urlRadarAcum6h_ref1='<div id="imagen%i" class="item">',
+                                         urlRadarAcum6h_ref2='<img class="lazyOwl" data-src="'):
         """
         Descarga las imagenes de un dia determinado de precipitacion acumulada en 6 h
         :param ruta_orig: Ruta en la que se guardan las imagenes descargadas
         """
+        self.habilitar_rutas(ruta_orig, subcarpetas=False)
         if self.estacion_radar.cod == '':
             return {'status': 700, 'out_file': 'EstacionSinCodigo2'}
         elif self.estacion_radar.nombre == '':
@@ -631,6 +664,7 @@ class ImagenRadarFile:
         :param tipo_imagen: Tipo de imagen: (1) ultimo radar (2) acumulado de 6 horas
         :param verbose: Mensajes informativos durante el procesado
         '''
+        #TODO: Pendiente el manejo de ruta de nombre_imagen_radar_orig_con_ruta y nombres de fichero con ImagenRadarAEMET.habilitar_rutas()
         self.nombre_imagen_radar_orig_con_ruta = nombre_imagen_radar_orig_con_ruta
         self.nombre_imagen_radar_tif_con_ruta = nombre_imagen_radar_tif_con_ruta
         self.nombre_imagen_radar_asc_con_ruta = nombre_imagen_radar_asc_con_ruta
