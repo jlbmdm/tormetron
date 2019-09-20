@@ -31,7 +31,7 @@ o bien con el método antiguo (menos recomendable):
 
 Para descargar imágenes de radar de la API de AEMET es necesario obtener antes una API_KEY de [AEMET](https://opendata.aemet.es/centrodedescargas/altaUsuario)
 
-# Uso en linea de comandos:
+### Uso en linea de comandos:
 
     $ python -m radatron [ options ]
     
@@ -58,7 +58,9 @@ Los comandos se puede abreviar respectivamente: -r, -e, -m, -c
 		$ python -m radatron -r 2 -e Palencia -m c --carpeta radarPalencia
 
 
-Para usarlo desde un script el paquete debe estar instalado en site-packages o estar disponible para el script:
+### Uso desde un script de python:
+
+Para usarlo desde un script el paquete debe estar instalado en site-packages o estar disponible para el script de forma que pueda importarse el paquete radatron:
 
 	>>> import radatron
 
