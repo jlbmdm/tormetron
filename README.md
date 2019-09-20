@@ -31,7 +31,7 @@ o bien con el método antiguo (menos recomendable):
 
 Para descargar imágenes de radar de la API de AEMET es necesario obtener antes una API_KEY de [AEMET](https://opendata.aemet.es/centrodedescargas/altaUsuario)
 
-# Uso en linea de comandos:
+### Uso en linea de comandos:
 
     $ python -m radatron [ options ]
     
