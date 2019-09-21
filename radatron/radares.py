@@ -406,7 +406,7 @@ class ImagenRadarAEMET:
         if self.verbose:
             print('Downloading from {}'.format(url))
         try:
-            r = requests.get(
+            r1 = requests.get(
                 url,
                 params=self.querystring,
                 headers=self.headers,
@@ -422,57 +422,68 @@ class ImagenRadarAEMET:
                       'params->', self.querystring,
                       'verify=False')
 
-            if r.json()['descripcion'] =="exito" or r.json()["estado"] == 200:
+            if r1.json()['descripcion'] =="exito" or r1.json()["estado"] == 200:
                 ahora = datetime.datetime.now() #<class 'datetime.datetime'>
                 if self.verbose:
                     print(ahora, 'Respuesta de la API de opendata.aemet.es: API KEY ok')
-                img_url_ = r.json()['datos']
-            elif r.json()['descripcion'] =="datos expirados" or\
-                 r.json()['descripcion'] == 'API key invalido' or\
-                 r.json()["estado"] == 404:
+                img_url_ = r1.json()['datos']
+            elif r1.json()['descripcion'] =="datos expirados" or\
+                 r1.json()['descripcion'] == 'API key invalido' or\
+                 r1.json()["estado"] == 404:
                 print('La API KEY es incorrecta')
                 if os.path.exists(self.api_key_file):
                     print('Eliminar o modificar el fichero', self.api_key_file)
                     sys.exit(2)
             else:
-                print('descripcion:', r.json()['descripcion'], 'estado:', r.json()["estado"])
-                print('Revisar http')
+                print(f'Respuesta de la API inesperada al url: {url}')
+                print('r1:', type(r1), dir(r1))
+                print(r1)
+                print(f'Código {r1.json()["estado"]} ({r1.json()["descripcion"]}). Url mandado: {url}')
+                print('Revisar url o estado de la API de AEMET')
                 quit()
 
-            error = ''
-            img_url = r.json().get('datos')
+        except:
+            if r1.json()['descripcion'] =="datos expirados" or\
+                r1.json()['descripcion'] == 'API key invalido' or\
+                r1.json()["estado"] == 404:
+                sys.exit(2)
+            print(f'Error {r1.json()["estado"]} ({r1.json()["descripcion"]}) al acceder al url {url}')
+            return {
+                'status': r1.json().get('estado', 'error'),
+                'out_file': [out_file]
+                }
+
+        try:
+            img_url = r1.json().get('datos')
+            self.verbose = True
             if self.verbose:
                 print('img_url:', img_url, img_url_)
                 #print(img_url)
-            r = requests.get(img_url, verify=False)
-            try:
-                error = r.json()
-            except:
-                pass
-            if error:
-                raise Exception(error)
+            r2 = requests.get(img_url, verify=False)
             if self.verbose:
-                print('Contenido devuelto por AEMET:', r.headers['Content-Type'], 'tamaño:', r.headers['Content-Length'], type(r.content))
-                print('Consulta:', r.headers['aemet_num'], 'Consultas restantes:', r.headers['Remaining-request-count'])
+                print('img_url:', img_url)
+                print('url:    ', r2.url)
+                print('r2:     ', r2, 'type:', type(r2), dir(r2))
+                print('json:   ', r2.json)
+                print('status_code:', r2.status_code)
+                #print('text:', r2.text) #Da error
+                print('Contenido devuelto por AEMET:', r2.headers['Content-Type'], 'tamaño:', r2.headers['Content-Length'], type(r2.content))
+                print('Consulta:', r2.headers['aemet_num'], 'Consultas restantes:', r2.headers['Remaining-request-count'])
 
-            if r.headers['Content-Type'][:9] == 'image/gif':
-                data = r.content
+            if r2.headers['Content-Type'][:9] == 'image/gif':
+                data = r2.content
                 with open(out_file, 'wb') as f:
                     f.write(data)
                 if self.verbose:
                     print('    Se ha creado una nueva imagen', out_file, 'de', os.path.getsize(out_file), 'bytes') 
-            elif r.headers['Content-Type'][:16] == 'application/json':
+            elif r2.headers['Content-Type'][:16] == 'application/json':
                 print('Imagen no disponible')
             else:
-                print('-->', r.headers['Content-Type'][:16])
+                print('-->', r2.headers['Content-Type'][:16])
         except:
-            if r.json()['descripcion'] =="datos expirados" or\
-                 r.json()['descripcion'] == 'API key invalido' or\
-                 r.json()["estado"] == 404:
-                sys.exit(2)
-            print('Error al descargar o guardar la imagen', out_file)
+            print(f'Error al guardar la imagen descargada. status_code: {r2.status_code}. Contenido devuelto: {r2.headers["Content-Type"]}. Imagen a guardar', out_file)
             return {
-                'status': r.json().get('estado', 'error'),
+                'status': 444,
                 'out_file': [out_file]
                 }
         return {

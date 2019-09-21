@@ -12,6 +12,10 @@ Ver carga en pypi:
     https://test.pypi.org/project/tormetron/0.0.1/
 Instalarlo con:
     $ pip install -i https://test.pypi.org/simple/ tormetron==0.0.1
+
+En eclipse si quiero que tire de la versión de radatron dentro del proyecto (no la instalada en site-packages)
+incluir la ruta de radatron en el PYTHONPATH del proyecto:
+    Eclipse -> proyect -> properties -> pydev - PYTHONPATH, incluir /radatron
 '''
 import os, sys
 import pathlib
@@ -22,24 +26,23 @@ try:
 except ImportError:    # Python 2
     from ConfigParser import RawConfigParser
 
+#REMOVE: quitar los comentarios y los print() al cargar los módulos
+#Esto funciona cuando el módulo se carga al importar el paquete radatron:
+#Este es el modo normal para cargar el package:
+#    >>> import radatron     # importo el paquete (sus clases) desde el interpreta de python
+#    $ python -m radatron    # ejecuto el paquete con la opción -m (ejecuta su __main__.py)
+#Modo heterodoxo, que es el que se ejecuta desde eclipse:
+#    $ python __main__.py
+#REMOVE:\>
 try:
-    #REMOVE: quitar los comentarios y los print() al cargar los módulos
-    #Esto funciona cuando el módulo se carga al importar el paquete radatron:
-    #Este es el modo normal para cargar el package:
-    #    >>> import radatron     # importo el paquete (sus clases) desde el interpreta de python
-    #    $ python -m radatron    # ejecuto el paquete con la opción -m (ejecuta su __main__.py)
-    print('Import -> Intentando carga del paquete radatron desde __main__.py: import radatron')
-    import radatron
-    print('Import radatron ok from __main__.py (loading as package %s)' % __name__)
-    #REMOVE:\>
+    print(f'Import -> Intentando cargar radares desde __main__.py con "import radares" (__name__ = {__name__})')
+    import radares
+    print('Import radares ok desde __main__.py')
 except:
-    #REMOVE: quitar los comentarios y los print() al cargar los módulos
-    #Esto funciona cuando este módulo se ejecuta de forma no ortodoxa:
-    #    $ python __main__.py
-    print('Como ha fallado import radatron, cargo el módulo radares con import radares as radatron')
-    import radares as radatron
-    print('Import radares as radatron ok from __init__.py (loading as package %s)' % __name__)
-    #REMOVE:\>
+    print('Como ha fallado "import radares" uso "from radatron import radares"')
+    from radatron import radares
+    print('from radatron import radares ok desde __main__.py')
+
 
 VERBOSE = False
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -129,10 +132,10 @@ def descargarRadar(tipo_radar, estacion_radar, modo, carpeta):
     :param carpeta:        Nombre de la carpeta en la que guardar las imágenes
     '''
     ruta_imagenes_radar = os.path.join(WORK_DIR, carpeta)
-    ruta_orig, ruta_tif, ruta_asc = radatron.ImagenRadarAEMET.habilitar_rutas(ruta_imagenes_radar)
+    ruta_orig, ruta_tif, ruta_asc = radares.ImagenRadarAEMET.habilitar_rutas(ruta_imagenes_radar)
     descargas_exitosas = 0
     descargas_fallidas = 0
-    imagen_radar = radatron.ImagenRadarAEMET(estacion_radar, verbose=VERBOSE)
+    imagen_radar = radares.ImagenRadarAEMET(estacion_radar, verbose=VERBOSE)
     while True:
         if tipo_radar == 'radar':
             rpta = imagen_radar.descargar_mapa_radar_regional(ruta_orig=ruta_orig)
@@ -164,11 +167,11 @@ def descargarRadar(tipo_radar, estacion_radar, modo, carpeta):
             nombre_imagen_radar_tif_con_ruta = nombre_imagen_radar_orig_con_ruta.replace(ruta_orig, ruta_tif).replace('.gif', '.tif').replace('.png', '.tif')
             nombre_imagen_radar_asc_con_ruta = nombre_imagen_radar_orig_con_ruta.replace(ruta_orig, ruta_asc).replace('.gif', '.asc').replace('.png', '.asc')
             if estacion_radar.nombre == 'Palencia':
-                imagen_radar_file = radatron.ImagenRadarFile(nombre_imagen_radar_orig_con_ruta=nombre_imagen_radar_orig_con_ruta,
-                                                             nombre_imagen_radar_tif_con_ruta=nombre_imagen_radar_tif_con_ruta,
-                                                             nombre_imagen_radar_asc_con_ruta=nombre_imagen_radar_asc_con_ruta,
-                                                             tipo_imagen=tipo_radar,
-                                                             verbose=VERBOSE)
+                imagen_radar_file = radares.ImagenRadarFile(nombre_imagen_radar_orig_con_ruta=nombre_imagen_radar_orig_con_ruta,
+                                                            nombre_imagen_radar_tif_con_ruta=nombre_imagen_radar_tif_con_ruta,
+                                                            nombre_imagen_radar_asc_con_ruta=nombre_imagen_radar_asc_con_ruta,
+                                                            tipo_imagen=tipo_radar,
+                                                            verbose=VERBOSE)
                 if not imagen_radar_file.ok:
                     #print('\tHa ocurrido algún error al grabar la imagen', nombre_imagen_radar_orig_con_ruta, '(no existe)')
                     break
@@ -275,14 +278,14 @@ def main(estacion='', radar='', modo='', carpeta=''):
     #Crea una instancia de la clase EstacionRadar (del paquete radatron) correspondiente a la estación solicitada (estacion)
     MODO_JB = True
     if MODO_JB:
-        estacion_radar = radatron.EstacionRadar(estacion_solicitada) #<class EstacionRadar'>
+        estacion_radar = radares.EstacionRadar(estacion_solicitada) #<class EstacionRadar'>
     else:
         #Esta es otra forma de instanciar la clase EstacionRadar) la del ejemplo de AEMET)
-        lista_radares = radatron.EstacionRadar.buscar_estacion(estacion_solicitada, instanciar=True) #<class 'list'>
+        lista_radares = radares.EstacionRadar.buscar_estacion(estacion_solicitada, instanciar=True) #<class 'list'>
         #print('lista_radares', lista_radares)
         if lista_radares is None or len(lista_radares) == 0:
             print('Radar de %s no encontrado. Escribe el nombre o codigo corecto. Nombres validos:' % estacion_solicitada)
-            for mi_lista_radar in radatron.EstacionRadar.LISTA_RADAR:
+            for mi_lista_radar in radares.EstacionRadar.LISTA_RADAR:
                 #TODO: arreglar para que muestre bien los acentos -> decode()
                 print('\t', mi_lista_radar['nombre'])
             sys.exit(1)

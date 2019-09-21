@@ -1,4 +1,20 @@
+Alternativas para usar o ejecutar un paquete:
+Supongamos las siguientes rutas:
+  El proyecto esta en ~/proyecto/...
+  El paquete es una subcarpeta del proyecto: ~/proyecto/paquete/...
+  El paquete incluye sus __init__.py y __main__.py y los modulos con las clases del paquete (p. ej. mimodulo.py, con las clases Clase1 y Clase2)
+  Si no tiene __main__.py, no vale para ejecutarlo en linea de comandos: hay que importarlo desde el interprete de python
+Linea de comandos:
+  Cargar el paquete ejecutando su modulo __main__.py:
+    ~/proyecto/> python -m paquete
+      Carga el __main__.py del paquete, que lo primero que hace es importar los módulos que necesita ese paquete:
+        import mimodulo
+      o bien:
+        from mimodulo import Clase1
+
+
 Secuencia básica
+
 
 En gitbash (o cmd):
   Ir a la carpeta en la que tienes tus proyectos (en mi caso D;\_ws)
