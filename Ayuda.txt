@@ -1,18 +1,64 @@
-Alternativas para usar o ejecutar un paquete:
-Supongamos las siguientes rutas:
+#Organización (layout) del proyecto############################################
+Ver https://realpython.com/python-application-layouts/)
+Tipos de layouts:
+  one-off scripts
+  command-line applications (CLI apps)
+  installable package
+Rutas del proyecto:
   El proyecto esta en ~/proyecto/...
+    El proyecto incluye varios ingredientes:
+      Instalador del paquete
+        setup.py
+        MANIFEST.in
+        README.md
+        LICENSE
+        requirements.txt (opcional?)
+      Cosas de pypi:
+        dist (carpeta)
+        build (carpeta)
+        tormetron.egg-info (carpeta)
+      Cosas de git:
+        .git (carpeta)
+        .gitignore (fichero)
+        .gitattributes
+      Cosas de Eclipse:
+        .settings (carpeta)
+          org.eclipse.core.resources.prefs con el encoding de los modulos
+        .project (fichero)
+        .pydevproject (fichero)
+
   El paquete es una subcarpeta del proyecto: ~/proyecto/paquete/...
-  El paquete incluye sus __init__.py y __main__.py y los modulos con las clases del paquete (p. ej. mimodulo.py, con las clases Clase1 y Clase2)
+    El paquete incluye sus:
+      __init__.py Se ejecuta cuando se importa el paquete (desde un script o desde el interprete interactivo de python)
+      __main__.py Se ejecuta cuando se llama al paquete en linea de comandos con \>python -m paquete
+      mimodulo.py, con las clases Clase1 y Clase2
   Si no tiene __main__.py, no vale para ejecutarlo en linea de comandos: hay que importarlo desde el interprete de python
-Linea de comandos:
+
+#Creación de packages y subiad a pypi
+Ver:
+  https://realpython.com/pypi-publish-python-package/
+  https://realpython.com/python-application-layouts/
+  https://realpython.com/pipenv-guide/
+
+#Alternativas para usar o ejecutar un paquete##################################
+Ejecución en linea de comandos:
   Cargar el paquete ejecutando su modulo __main__.py:
     ~/proyecto/> python -m paquete
       Carga el __main__.py del paquete, que lo primero que hace es importar los módulos que necesita ese paquete:
         import mimodulo
       o bien:
         from mimodulo import Clase1
+ Orden de busqueda de los modulo al ejecutar el import
+  Ruta en la que esta el python.exe (os.path.dirname(os.path.abspath(sys.executable)))
+  Ruta en la que está el módulo (os.path.dirname(os.path.abspath(__file__)))o, si se esta en interactivo, ruta desde la que se llama al interprete de python
+  Rutas del PYTHONPATH
+  Rutas especificadas en la instalación de python (site-packages, etc)
+  Rutas especificadas en propiedades del proyecto de eclipse
+  No busca en las rutas del PATH
+  No busca en la ruta desde la que se ejecuta el modulo
 
-
+Ejecución desde el interprete de python
+  
 Secuencia básica
 
 

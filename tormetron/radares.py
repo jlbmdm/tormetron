@@ -24,11 +24,11 @@ except:
     #import gdal, osr, gdalconst
 
 try:
-    from radatron import constants
-    #from radarAEMET.constants import BASE_DIR, API_KEY, API_KEY_FILE1, API_KEY_FILE2, RADAR_NACIONAL_API_URL, RADAR_REGIONAL_API_URL
-except:
     import constants
     #from constants import BASE_DIR, API_KEY, API_KEY_FILE1, API_KEY_FILE2, RADAR_NACIONAL_API_URL, RADAR_REGIONAL_API_URL
+except:
+    print('Falta el módulo contants.py, que debería estar en la misma ruta que radares.py (.../tormetron/')
+    sys.exit(0)
 
 HOME_DIR = str(pathlib.Path.home())
 FILE_DIR = os.path.dirname(os.path.abspath(__file__)) #Equivale a FILE_DIR = pathlib.Path(__file__).parent
@@ -447,7 +447,8 @@ class ImagenRadarAEMET:
                 r1.json()['descripcion'] == 'API key invalido' or\
                 r1.json()["estado"] == 404:
                 sys.exit(2)
-            print(f'Error {r1.json()["estado"]} ({r1.json()["descripcion"]}) al acceder al url {url}')
+            #print(f'Error {r1.json()["estado"]} ({r1.json()["descripcion"]}) al acceder al url {url}')
+            print(f'Error')
             return {
                 'status': r1.json().get('estado', 'error'),
                 'out_file': [out_file]
@@ -502,6 +503,7 @@ class ImagenRadarAEMET:
         :param urlRadarAcum6hCompleto: Url de la paginweb en la que esta la imagen radar
         :param nombre_Imagen_acum6h: Nombre del archivo en el que se va a guardar
         """
+        self.verbose = True
         if self.verbose:
             print('Downloading from {}'.format(urlRadarAcum6hCompleto))
         try:
@@ -547,15 +549,18 @@ class ImagenRadarAEMET:
             posicion3 = posicion2 + rpta1.text[posicion2:].find('.gif')
             avance3 = 4
             urlImagen = 'http://www.aemet.es%s' % rpta1.text[posicion2 + avance2: posicion3 + avance3]
+            if self.verbose:
+                print(nImagen, 'urlImagen:', urlImagen)
             idImagen = urlImagen[-21:-4].replace('\\', '_').replace('/', '_')
             nombre_Imagen_acum6h_con_ruta_fechado = nombre_Imagen_acum6h_con_ruta.replace('.gif', f'_{idImagen}.gif')
             if os.path.exists(nombre_Imagen_acum6h_con_ruta_fechado):
-                continue
-                #print('La imagen', nombre_Imagen_acum6h_con_ruta_fechado, 'ya existe: se sobreescribe')
+                if self.verbose:
+                    print('\tLa imagen', nombre_Imagen_acum6h_con_ruta_fechado, 'ya existe: no se sobreescribe')
                 #try:
                 #    os.remove(nombre_Imagen_acum6h_con_ruta_fechado)
                 #except:
                 #    return {'status': 600, 'out_file': lista_nombre_ficheros}
+                continue
             lista_nombre_ficheros.append(nombre_Imagen_acum6h_con_ruta_fechado)
             if self.verbose:
                 print('Se ha encontrado el url de la imagen buscada (acum 6h): {} (num {})'.format(urlImagen, nImagen))
@@ -616,7 +621,8 @@ class ImagenRadarAEMET:
         :param ruta_orig: Ruta en la que se guardan las imagenes descargadas
         """
         self.habilitar_rutas(ruta_orig, subcarpetas=False)
-        url_imagen_radar = constants.RADAR_REGIONAL_API_URL.format(self.estacion_radar.cod)
+        #url_imagen_radar = str(constants.RADAR_REGIONAL_API_URL).format(self.estacion_radar.cod)
+        url_imagen_radar = str(constants.RADAR_REGIONAL_API_URL).replace('vd', self.estacion_radar.cod)
         if self.estacion_radar.cod == '':
             return {'status': 700, 'out_file': 'EstacionSinCodigo1'}
         elif self.estacion_radar.nombre == '':

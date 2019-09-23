@@ -5,10 +5,8 @@ data/
 copiasSeguridad/
 .aemet/
 api.key
-Leeme.txt
-myLog.txt
-pruebas.py
-git_help.txt
+pruebas/*.*
+*.txt
 *.bak
 
 

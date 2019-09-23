@@ -13,9 +13,9 @@ Ver carga en pypi:
 Instalarlo con:
     $ pip install -i https://test.pypi.org/simple/ tormetron==0.0.1
 
-En eclipse si quiero que tire de la versión de radatron dentro del proyecto (no la instalada en site-packages)
-incluir la ruta de radatron en el PYTHONPATH del proyecto:
-    Eclipse -> proyect -> properties -> pydev - PYTHONPATH, incluir /radatron
+En eclipse si quiero que tire de la versión de tormetron dentro del proyecto (no la instalada en site-packages)
+incluir la ruta de tormetron en el PYTHONPATH del proyecto:
+    Eclipse -> proyect -> properties -> pydev - PYTHONPATH, incluir /tormetron
 '''
 import os, sys
 import pathlib
@@ -27,31 +27,34 @@ except ImportError:    # Python 2
     from ConfigParser import RawConfigParser
 
 #REMOVE: quitar los comentarios y los print() al cargar los módulos
-#Esto funciona cuando el módulo se carga al importar el paquete radatron:
+#Esto funciona cuando el módulo se carga al importar el paquete tormetron:
 #Este es el modo normal para cargar el package:
-#    >>> import radatron     # importo el paquete (sus clases) desde el interpreta de python
-#    $ python -m radatron    # ejecuto el paquete con la opción -m (ejecuta su __main__.py)
+#    >>> import tormetron     # importo el paquete (sus clases) desde el interpreta de python
+#    $ python -m tormetron    # ejecuto el paquete con la opción -m (ejecuta su __main__.py)
 #Modo heterodoxo, que es el que se ejecuta desde eclipse:
 #    $ python __main__.py
 #REMOVE:\>
 try:
+    #Si el paquete esta en el mismo directorio que el script que se está ejecutando (en este caso __main__.py):
     print(f'Import -> Intentando cargar radares desde __main__.py con "import radares" (__name__ = {__name__})')
     import radares
-    print('Import radares ok desde __main__.py')
+    print(f'Import radares ok desde __main__.py -> {radares.__file__}')
 except:
-    print('Como ha fallado "import radares" uso "from radatron import radares"')
-    from radatron import radares
-    print('from radatron import radares ok desde __main__.py')
+    #Si el paquete no esta en el direcotorio de trabajo sino que está instalado en site-packages:
+    print('Como ha fallado "import radares" uso "from tormetron import radares"')
+    from tormetron import radares
+    print(f'from tormetron import radares ok desde __main__.py -> {radares.__file__}')
+
 
 
 VERBOSE = False
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 WORK_DIR = os.path.abspath(os.path.join(FILE_DIR, '..')) #Equivale a FILE_DIR = pathlib.Path(__file__).parent
-TRON_DIR = os.path.join(WORK_DIR, 'radatron')
+TRON_DIR = os.path.join(WORK_DIR, 'tormetron')
 if FILE_DIR != TRON_DIR:
-    print('\nSe está trabajando en una versión reubicada del paquete radatron')
+    print('\nSe está trabajando en una versión reubicada del paquete tormetron')
 if not os.path.exists(TRON_DIR):
-    print('\nFalta el directorio {os.path.join(WORK_DIR, "radatron"")}; revisar nombre del paquete')
+    print('\nFalta el directorio {os.path.join(WORK_DIR, "tormetron"")}; revisar nombre del paquete')
     #sys.exit(0)
 
 #REMOVE: quitar este chequeo de directorios
@@ -59,6 +62,8 @@ def chequear_directorios():
     HOME_DIR = str(pathlib.Path.home())
     BASE_DIR = os.path.abspath('.')
     SUPR_DIR = os.path.abspath('..') #Equivale a SUPR_DIR = os.path.abspath(r'../')
+    EXEC_DIR = os.path.dirname(os.path.abspath(sys.executable))
+    print('\nInterprete de python:          ', EXEC_DIR)
     print('Fichero que se esta ejecutando:', __file__)
     print('\nDirectorios de la aplicación:')
     print('  Directorio en el que esta el fichero en ejecución     (FILE_DIR):', FILE_DIR)
@@ -67,6 +72,7 @@ def chequear_directorios():
     print('  Directorio base desde el que se lanza la ejecucion    (BASE_DIR):', BASE_DIR)
     print('  Directorio padre del BASE_DIR                         (SUPR_DIR):', SUPR_DIR)
     print('Directorio HOME del usuario                             (HOME_DIR):', HOME_DIR)
+    print('Directorio en el que está el interprete de python       (EXEC_DIR):', EXEC_DIR)
     print('\nDirectorio de trabajo -> RAIZ_DIR                       (WORK_DIR):', WORK_DIR)
 chequear_directorios()
 #REMOVE:\>
@@ -125,9 +131,9 @@ if not config_ok:
 
 def descargarRadar(tipo_radar, estacion_radar, modo, carpeta):
     '''
-    Lanza la descarga de las imagenes radar o acum6h usando el paquete radatron 
+    Lanza la descarga de las imagenes radar o acum6h usando el paquete tormetron 
     :param tipo_radar:     "1": ultimo radar; "2" acum de las ultimas 6 horas
-    :param estacion_radar: Instancia de la clase EstacionRadar (del paquete radatron)
+    :param estacion_radar: Instancia de la clase EstacionRadar (del paquete tormetron)
     :param modo:           "c": para descarga continua; "p" (resto): descarga puntual
     :param carpeta:        Nombre de la carpeta en la que guardar las imágenes
     '''
@@ -144,7 +150,9 @@ def descargarRadar(tipo_radar, estacion_radar, modo, carpeta):
                                                                  urlRadarAcum6h=config_dict['urlRadarAcum6h'][0],
                                                                  urlRadarAcum6h_ref1=config_dict['urlRadarAcum6h_ref1'][0],
                                                                  urlRadarAcum6h_ref2=config_dict['urlRadarAcum6h_ref2'][0])
-        if rpta['status'] == 200:
+        if rpta['status'] == 200 and not rpta["out_file"]:
+            print(f'No hay nuevas imagenes para descargar (ya estan descargadas)')
+        elif rpta['status'] == 200:
             descargas_exitosas += 1
             out_file = rpta["out_file"][0].replace("\\", "/")
             print(f'{descargas_exitosas} de {descargas_fallidas + descargas_exitosas}', end=' ->')
@@ -227,7 +235,7 @@ def main(estacion='', radar='', modo='', carpeta=''):
     '''
     Realiza tres acciones:
         Lee los parametros que se pasan en linea de comandos y los que no se pasan los extrae del config.cfg
-        Crea una instancia de la clase EstacionRadar (del paquete radatron) correspondiente a la estación solicitada (estacion)
+        Crea una instancia de la clase EstacionRadar (del paquete tormetron) correspondiente a la estación solicitada (estacion)
         Llama a la función descargarRadar() para lanzar la descarga
     :param tipo_radar:     "1": ultimo radar; "2" acum de las ultimas 6 horas
     :param estacion_radar: Nombre o codigo de la estacón radar
@@ -275,7 +283,7 @@ def main(estacion='', radar='', modo='', carpeta=''):
     if carpeta == '':
         carpeta = config_dict['carpeta'][0]
 
-    #Crea una instancia de la clase EstacionRadar (del paquete radatron) correspondiente a la estación solicitada (estacion)
+    #Crea una instancia de la clase EstacionRadar (del paquete tormetron) correspondiente a la estación solicitada (estacion)
     MODO_JB = True
     if MODO_JB:
         estacion_radar = radares.EstacionRadar(estacion_solicitada) #<class EstacionRadar'>

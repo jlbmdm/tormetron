@@ -16,16 +16,16 @@ try:
     from radares import ImagenRadarFile
     #print(f'Import classes of radares ok from __init__.py (__name__ = {__name__}')
 except:
-    from radatron.radares import EstacionRadar
-    from radatron.radares import ImagenRadarAEMET
-    from radatron.radares import ImagenRadarFile
-    print(f'Import classes of radatron.radares ok from __init__.py (__name__ = {__name__}')
+    from tormetron.radares import EstacionRadar
+    from tormetron.radares import ImagenRadarAEMET
+    from tormetron.radares import ImagenRadarFile
+    print(f'Import classes of tormetron.radares ok from __init__.py (__name__ = {__name__}')
 
 def main():
     #REMOVE: quitar los comentarios y los print(). Sustituir por pass
     #Estos mensajes solo se muestran si se llama directamente __ini__.py
-    #Cuando el módulo se carga al importar el paquete radatron, este mensaje no se muestra
-    print('\nSe ha llamado especificamente a /radatron/__init__.py como main(): modo de prueba de carga de clases')
+    #Cuando el módulo se carga al importar el paquete tormetron, este mensaje no se muestra
+    print('\nSe ha llamado especificamente a /tormetron/__init__.py como main(): modo de prueba de carga de clases')
     print('Simplemente se prueba la carga de paquetes y no se ejecuta busqueda de estación ni descarga de imágenes')
     print('Lista de estaciones (EstacionRadar.LISTA_RADAR):')
     for estacion_radar in EstacionRadar.LISTA_RADAR:

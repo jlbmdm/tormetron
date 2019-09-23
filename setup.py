@@ -27,16 +27,16 @@ setup(
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
     ],
-    packages=["radatron"],
+    packages=["tormetron"],
     include_package_data=True,
     install_requires=[
         "requests", "numpy", "gdal", "click"
     ],
-    entry_points={"console_scripts": ["tormetron=radatron.__main__:main"]},
+    entry_points={"console_scripts": ["tormetron=tormetron.__main__:main"]},
 )
 
 #Aviso: para incluir la carpeta radardata y otros ficheros uso el MANIFEST.in en lugar de la linea:
-#    package_data={'': ['README.md', 'LICENSE', 'radatron/radardata']},
+#    package_data={'': ['README.md', 'LICENSE', 'tormetron/radardata']},
 #Ver:
 # https://stackoverflow.com/questions/1612733/including-non-python-files-with-setup-py
 # https://stackoverflow.com/questions/1471994/what-is-setup-py
