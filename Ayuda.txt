@@ -53,6 +53,18 @@ Ver:
   https://realpython.com/python-application-layouts/
   https://realpython.com/pipenv-guide/
 
+#Building and uploading to pypi
+  $ python setup.py sdist
+    -> Solo crea:
+      /dist/tormetron-0.0.dev1.tar.gz
+      /tormetron.egg-info/*.*
+  $ python setup.py sdist bdist
+    -> Crea también:
+      /dist/tormetron-0.0.dev1.win-amd64.zip
+      /build/*.*
+      
+  $ twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
 #Alternativas para usar o ejecutar un paquete##################################
 Ejecución en linea de comandos:
   Cargar el paquete ejecutando su modulo __main__.py:

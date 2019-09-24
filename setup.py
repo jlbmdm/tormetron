@@ -10,7 +10,7 @@ with open(os.path.join(HERE, "README.md")) as fid:
 
 setup(
     name="tormetron",
-    version="0.0.dev1",
+    version="0.0.dev2",
     description="Download, save and process rainfall radar images from AEMET",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -19,10 +19,18 @@ setup(
     author_email="tratratron@gmail.com",
     license="MIT",
     classifiers=[
+        "Development Status :: 2 - Pre-Alpha",
+        "Environment :: Win32 (MS Windows)",
+        "Environment :: X11 Applications",
         "License :: OSI Approved :: MIT License",
+        "Natural Language :: Spanish",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX :: Linux",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
+        "Topic :: Scientific/Engineering :: Atmospheric Science",
+        "Topic :: Scientific/Engineering :: GIS",
     ],
     packages=["tormetron"],
     include_package_data=True,
@@ -31,6 +39,7 @@ setup(
     ],
     entry_points={"console_scripts": ["tormetron=tormetron.__main__:main"]},
 )
+#Para classifiers, ver https://pypi.org/pypi?%3Aaction=list_classifiers
 
 #Aviso: para incluir la carpeta radardata y otros ficheros uso el MANIFEST.in en lugar de la linea:
 #    package_data={'': ['README.md', 'LICENSE', 'tormetron/radardata']},

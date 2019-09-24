@@ -9,7 +9,7 @@ Created on 31 ago. 2019
 '''
 #Para versionado, ver
 #    https://www.python.org/dev/peps/pep-0440/
-__version__ = '0.0.dev1'
+__version__ = '0.0.dev2'
 
 try:
     from radares import EstacionRadar

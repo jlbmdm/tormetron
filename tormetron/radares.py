@@ -27,8 +27,9 @@ try:
     import constants
     #from constants import BASE_DIR, API_KEY, API_KEY_FILE1, API_KEY_FILE2, RADAR_NACIONAL_API_URL, RADAR_REGIONAL_API_URL
 except:
-    print('Falta el módulo contants.py, que debería estar en la misma ruta que radares.py (.../tormetron/')
-    sys.exit(0)
+    from tormetron import constants
+    #print('Falta el módulo contants.py, que debería estar en la misma ruta que radares.py (.../tormetron/')
+    #sys.exit(0)
 
 HOME_DIR = str(pathlib.Path.home())
 FILE_DIR = os.path.dirname(os.path.abspath(__file__)) #Equivale a FILE_DIR = pathlib.Path(__file__).parent
@@ -430,8 +431,9 @@ class ImagenRadarAEMET:
             elif r1.json()['descripcion'] =="datos expirados" or\
                  r1.json()['descripcion'] == 'API key invalido' or\
                  r1.json()["estado"] == 404:
-                print('La API KEY es incorrecta')
+                print(r1.json()['descripcion'])
                 if os.path.exists(self.api_key_file):
+                    print('url:', url)
                     print('Eliminar o modificar el fichero', self.api_key_file)
                     sys.exit(2)
             else:

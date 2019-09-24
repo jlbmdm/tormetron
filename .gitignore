@@ -6,7 +6,8 @@ copiasSeguridad/
 .aemet/
 api.key
 pruebas/*.*
-*.txt
+basura/*.*
+local/*.*
 *.bak
 
 
