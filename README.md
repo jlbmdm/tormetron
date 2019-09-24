@@ -1,22 +1,22 @@
-#Tormetron
+# Tormetron
 
-Tormetron es un paquete destinado a descargar, guardar y procesar imágenes ofrecidas por AEMET (www.aemet.es) referentes a:
-  * Radares de precipitación. Fuente: API de AEMET ([aemet open data](https://opendata.aemet.es/)).
-  * Precipitación acumulada de 6 horas. Fuente: web de AEMET ([aemet radar](http://www.aemet.es/es/eltiempo/observacion/radar)).
+Tormetron es un paquete destinado a descargar, guardar y procesar imÃ¡genes ofrecidas por AEMET (www.aemet.es) referentes a:
+  * Radares de precipitaciÃ³n. Fuente: API de AEMET ([aemet open data](https://opendata.aemet.es/)).
+  * PrecipitaciÃ³n acumulada de 6 horas. Fuente: web de AEMET ([aemet radar](http://www.aemet.es/es/eltiempo/observacion/radar)).
   
-Página web ~~en preparación~~
+PÃ¡gina web ~~en preparaciÃ³n~~
 
-##Descarga e instalación
+## Descarga e instalaciÃ³n
 
 Se puede descargar e instalar en un solo paso desde [PyPI](https://pypi.org/project/tormetron/):
 
-* Versión de prueba en test.pypi.org:
+* VersiÃ³n de prueba en test.pypi.org:
 
 ```
 $ pip install -i https://test.pypi.org/simple/ tormetron==0.0.1
 ```
 
-* Última versión disponible en pypi:
+* Ãšltima versiÃ³n disponible en pypi:
 
 ```
 $ pip install tormetron
@@ -24,9 +24,9 @@ $ pip install tormetron
 
 Tormetron funciona en Python 2.7 y en Python 3.4 o superior.
 
-Se puede descargar la versión en desarrollo disponible en [github](https://github.com/jlbmdm/tormetron) (repositorio provisionalmente privado; se hará público con la versión 1.0.0)
+Se puede descargar la versiÃ³n en desarrollo disponible en [github](https://github.com/jlbmdm/tormetron) (repositorio provisionalmente privado; se harÃ¡ pÃºblico con la versiÃ³n 1.0.0)
 
-Si se descarga el paquete desde github, se puede instalar para que esté disponible para python (en lib/site-packages). Para ello, desde la consola de comandos (cmd en Windows):
+Si se descarga el paquete desde github, se puede instalar para que estÃ© disponible para python (en lib/site-packages). Para ello, desde la consola de comandos (cmd en Windows):
 
 ```
 $ cd ruta_del_proyecto
@@ -34,7 +34,7 @@ $ pip install .
 
 ```
 
-o bien con el método antiguo (menos recomendable):
+o bien con el mÃ©todo antiguo (menos recomendable):
 
 ```
 $ cd ruta_del_proyecto
@@ -42,29 +42,29 @@ $ python setup.py install
 ```
 >ruta\_del\_proyecto es la carpeta del proyecto (la que contine el setup.py)
 
-##Uso de tormetron
+## Uso de tormetron
 
-Para descargar imágenes de radar de la API de AEMET es necesario obtener antes una API_KEY de [AEMET](https://opendata.aemet.es/centrodedescargas/altaUsuario)
+Para descargar imÃ¡genes de radar de la API de AEMET es necesario obtener antes una API_KEY de [AEMET](https://opendata.aemet.es/centrodedescargas/altaUsuario)
 
-###Uso en linea de comandos
+### Uso en linea de comandos
 
     $ python -m radatron [ options ]
     
 &nbsp;&nbsp;&nbsp;&nbsp;options:
 
->--radar n
->>n: &nbsp;&nbsp;&nbsp;&nbsp;1 ultimo radar
->>>2 acum de las ultimas 6 horas
+--radar n
+&nbsp;&nbsp;n: &nbsp;&nbsp;1 ultimo radar
+&nbsp;&nbsp;2 acum de las ultimas 6 horas
 
->--estacion nombre
->>nombre: nombre o codigo de la estación radar; por defecto, Palencia
+--estacion nombre
+&nbsp;&nbsp;nombre: nombre o codigo de la estaciÃ³n radar; por defecto, Palencia
 
->--modo m
->>m: &nbsp;&nbsp;&nbsp;&nbsp;p descarga puntual
->>>c descarga programada la cada 10 minutos -último radar- o 24 horas -acum de las últimas 6 horas-
+--modo m
+&nbsp;&nbsp;m: &nbsp;&nbsp;p descarga puntual
+&nbsp;&nbsp;c descarga programada la cada 10 minutos -Ãºltimo radar- o 24 horas -acum de las Ãºltimas 6 horas-
 
->--carpeta dir
->>dir: nombre de la carpeta en la que guardar las imágenes; por defecto, "data"
+--carpeta dir
+&nbsp;&nbsp;dir: nombre de la carpeta en la que guardar las imÃ¡genes; por defecto, "data"
 			
 Los comandos se puede abreviar respectivamente: -r, -e, -m, -c
 
@@ -93,31 +93,31 @@ Para usarlo desde un script el paquete debe estar instalado en site-packages o e
 TODO: Pendiente completar las instrucciones
 
 
-## Organización interna
+## OrganizaciÃ³n interna
 
-Tormetron incluye un paquete llamado __tormetron__ con un módulo principal, _radares.py_, que tiene tres clases:
+Tormetron incluye un paquete llamado __tormetron__ con un mÃ³dulo principal, _radares.py_, que tiene tres clases:
 
-- Class EstacionRadar     -> Incluye métodos para buscar/identificar una estación radar
+- Class EstacionRadar     -> Incluye mÃ©todos para buscar/identificar una estaciÃ³n radar
   
-- Class ImagenRadarAEMET  -> Incluye métodos para descargar imágenes radar de AEMET
+- Class ImagenRadarAEMET  -> Incluye mÃ©todos para descargar imÃ¡genes radar de AEMET
 
-- Class ImagenRadarFile   -> Con métodos para procesar georreferenciar imágenes descargadas
+- Class ImagenRadarFile   -> Con mÃ©todos para procesar georreferenciar imÃ¡genes descargadas
 
-Las clases y sus métodos se documentarán próximamente.
+Las clases y sus mÃ©todos se documentarÃ¡n prÃ³ximamente.
 
 El script \_\_main\_\_.py utiliza estas clases para:
 
- * Obtener imagen(es) rádar
+ * Obtener imagen(es) rÃ¡dar
 
   o bien:
 
- * Obtener imagen de precipitación de las últimas 6 horas
+ * Obtener imagen de precipitaciÃ³n de las Ãºltimas 6 horas
     
 En ambos casos se puede descargar:
 		
  * 0 Modo puntual: ultima imagen disponible
 			
- * 1 Modo continuo: descarga la imagen disponble cada 10 minutos (tiempo de actualización)
+ * 1 Modo continuo: descarga la imagen disponble cada 10 minutos (tiempo de actualizaciÃ³n)
 
-En el caso del radar, AEMET actualiza la imagen cada 10 minutos. Para la imagen de precipitaciónde las últimas horas, AEMET ofrece las últimas 8 imagenes, correspondientes a los 4 momentos de referencia del día (AEMET genera estas imágenes a las 00:00, 06:00, 12:00 y 18:00 cada día).
+En el caso del radar, AEMET actualiza la imagen cada 10 minutos. Para la imagen de precipitaciÃ³nde las Ãºltimas horas, AEMET ofrece las Ãºltimas 8 imagenes, correspondientes a los 4 momentos de referencia del dÃ­a (AEMET genera estas imÃ¡genes a las 00:00, 06:00, 12:00 y 18:00 cada dÃ­a).
 
