@@ -40,7 +40,7 @@ o bien con el método antiguo (menos recomendable):
 $ cd ruta_del_proyecto
 $ python setup.py install
 ```
->ruta\_del\_proyecto es la carpeta del proyecto (la que contine el setup.py)
+ruta\_del\_proyecto es la carpeta del proyecto (la que contine el setup.py)
 
 ## Uso de tormetron
 
