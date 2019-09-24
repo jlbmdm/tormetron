@@ -1,11 +1,18 @@
+#Visores de rainfall radar:
+  http://www.aemet.es/es/eltiempo/observacion/radar -> https://opendata.aemet.es/centrodedescargas/inicio
+  https://www.woespana.es/weather/maps/radar
+  https://www.rainviewer.com/ -> https://www.rainviewer.com/api.html
+  https://www.rainradar.net/
+
 #Organización (layout) del proyecto############################################
 Ver https://realpython.com/python-application-layouts/)
 Tipos de layouts:
   one-off scripts
   command-line applications (CLI apps)
   installable package
-Rutas del proyecto:
-  El proyecto esta en ~/proyecto/...
+
+#Rutas del proyecto:
+  El proyecto esta en ~/tormetron/...
     El proyecto incluye varios ingredientes:
       Instalador del paquete
         setup.py
@@ -27,15 +34,21 @@ Rutas del proyecto:
         .project (fichero)
         .pydevproject (fichero)
 
-  El paquete es una subcarpeta del proyecto: ~/proyecto/paquete/...
+  El paquete es una subcarpeta del proyecto: ~/tormetron/tormetron/...
     El paquete incluye sus:
       __init__.py Se ejecuta cuando se importa el paquete (desde un script o desde el interprete interactivo de python)
-      __main__.py Se ejecuta cuando se llama al paquete en linea de comandos con \>python -m paquete
+      __main__.py Se ejecuta cuando se llama al paquete en linea de comandos con \>python -m tormetron
       mimodulo.py, con las clases Clase1 y Clase2
-  Si no tiene __main__.py, no vale para ejecutarlo en linea de comandos: hay que importarlo desde el interprete de python
+  Si no tiene __main__.py, no vale para ejecutarlo en linea de comandos: hay que importarlo desde un script o el interprete de python
 
-#Creación de packages y subiad a pypi
+#Markdown syntax:
+  Ver
+    https://guides.github.com/features/mastering-markdown/
+    https://help.github.com/en/articles/basic-writing-and-formatting-syntax
+
+#Creación de packages y subida a pypi
 Ver:
+  https://packaging.python.org/tutorials/packaging-projects/
   https://realpython.com/pypi-publish-python-package/
   https://realpython.com/python-application-layouts/
   https://realpython.com/pipenv-guide/

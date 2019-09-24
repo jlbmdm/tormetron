@@ -7,8 +7,9 @@ Created on 31 ago. 2019
 # -*- coding: UTF8 -*-
 # -*- coding: cp1252 -*-
 '''
-
-__version__ = '0.0.1'
+#Para versionado, ver
+#    https://www.python.org/dev/peps/pep-0440/
+__version__ = '0.0.dev1'
 
 try:
     from radares import EstacionRadar
