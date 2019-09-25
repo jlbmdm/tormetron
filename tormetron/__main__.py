@@ -320,7 +320,7 @@ def main(estacion='', radar='', modo='', carpeta=''):
         #Proceso solo el primero de la lista
         estacion_radar = lista_radares[0]
     #print('estacion_radar', type(estacion_radar)) #<class '__main__.EstacionRadar'>
-    print('Radar encontrado:', estacion_radar.nombre)
+    #print('Radar encontrado:', estacion_radar.nombre)
 
     #Llama a la función descargarRadar() para lanzar la descarga
     descargarRadar(tipo_radar, estacion_radar, modo, carpeta)

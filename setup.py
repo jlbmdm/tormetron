@@ -10,7 +10,7 @@ with open(os.path.join(HERE, "README.md")) as fid:
 
 setup(
     name="tormetron",
-    version="0.0.dev2",
+    version="0.0.dev3",
     description="Download, save and process rainfall radar images from AEMET",
     long_description=README,
     long_description_content_type="text/markdown",
