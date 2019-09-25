@@ -35,15 +35,21 @@ except ImportError:    # Python 2
 #    $ python __main__.py
 #REMOVE:\>
 try:
-    #Si el paquete esta en el mismo directorio que el script que se está ejecutando (en este caso __main__.py):
-    print(f'Import -> Intentando cargar radares desde __main__.py con "import radares" (__name__ = {__name__})')
-    import radares
-    print(f'Import radares ok desde __main__.py -> {radares.__file__}')
-except:
     #Si el paquete no esta en el direcotorio de trabajo sino que está instalado en site-packages:
-    print('Como ha fallado "import radares" uso "from tormetron import radares"')
+    #Si ejecuto __main__.py al cargar tormetron con $ python -m tormetron
     from tormetron import radares
-    print(f'from tormetron import radares ok desde __main__.py -> {radares.__file__}')
+    #REMOVE: quitar este mensaje que aparece al importar tormetron:
+    print('Dev', end=' --> ')
+    print(f'from tormetron import radares ok desde __main__.py       -> __name__: {__name__} ({radares.__file__})')
+    #REMOVE/>
+except:
+    #Si el paquete esta en el mismo directorio que el script que se está ejecutando (en este caso __main__.py):
+    #Si ejecuto __main__.py de forma heterodoxa, desde eclipse (y no tengo tormetron instalado en site-packages)
+    import radares
+    #REMOVE: quitar este mensaje que aparece al importar tormetron:
+    print('Dev', end=' --> ')
+    print(f'Import radares ok desde __main__.py                      -> __name__: {__name__} ({radares.__file__})')
+    #REMOVE/>
 
 
 
@@ -56,6 +62,10 @@ if FILE_DIR != TRON_DIR:
 if not os.path.exists(TRON_DIR):
     print('\nFalta el directorio {os.path.join(WORK_DIR, "tormetron"")}; revisar nombre del paquete')
     #sys.exit(0)
+if os.path.abspath('.') == os.path.dirname(os.path.abspath(__file__)):
+    BASE_DIR = os.path.abspath('..')
+else:
+    BASE_DIR = os.path.abspath('.')
 
 #REMOVE: quitar este chequeo de directorios
 def chequear_directorios():
@@ -137,7 +147,11 @@ def descargarRadar(tipo_radar, estacion_radar, modo, carpeta):
     :param modo:           "c": para descarga continua; "p" (resto): descarga puntual
     :param carpeta:        Nombre de la carpeta en la que guardar las imágenes
     '''
-    ruta_imagenes_radar = os.path.join(WORK_DIR, carpeta)
+    ruta_imagenes_radar = os.path.join(BASE_DIR, carpeta)
+    if modo != 'c':
+        ahora = str(datetime.datetime.now()).replace(' ', '_').replace(':', 'h')[:16]
+        ruta_imagenes_radar = os.path.join(ruta_imagenes_radar, f'radar_{ahora}')
+    
     ruta_orig, ruta_tif, ruta_asc = radares.ImagenRadarAEMET.habilitar_rutas(ruta_imagenes_radar)
     descargas_exitosas = 0
     descargas_fallidas = 0
@@ -155,10 +169,16 @@ def descargarRadar(tipo_radar, estacion_radar, modo, carpeta):
         elif rpta['status'] == 200:
             descargas_exitosas += 1
             out_file = rpta["out_file"][0].replace("\\", "/")
-            print(f'{descargas_exitosas} de {descargas_fallidas + descargas_exitosas}', end=' ->')
+            print(f'{descargas_exitosas} de {descargas_fallidas + descargas_exitosas}', end='')
+            n_file = 0
             for nombre_imagen_radar_orig_con_ruta in rpta['out_file']:
+                if n_file == 0:
+                    tabulador = '\t'
+                else:
+                    tabulador = '\t'
                 out_file = nombre_imagen_radar_orig_con_ruta.replace("\\", "/")
-                print(f'\tDescarga radar {estacion_radar.nombre_raw} ok. Fichero: {out_file}')
+                print(f'{tabulador}Descarga radar {estacion_radar.nombre_raw} ok. Fichero: {out_file}')
+                n_file += 1
         else:
             numero_error = rpta['status']
             nombre_imagen_radar_orig_con_ruta = rpta['out_file']
@@ -299,7 +319,7 @@ def main(estacion='', radar='', modo='', carpeta=''):
             sys.exit(1)
         #Proceso solo el primero de la lista
         estacion_radar = lista_radares[0]
-    print('estacion_radar', type(estacion_radar)) #<class '__main__.EstacionRadar'>
+    #print('estacion_radar', type(estacion_radar)) #<class '__main__.EstacionRadar'>
     print('Radar encontrado:', estacion_radar.nombre)
 
     #Llama a la función descargarRadar() para lanzar la descarga

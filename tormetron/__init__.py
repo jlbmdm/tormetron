@@ -11,16 +11,28 @@ Created on 31 ago. 2019
 #    https://www.python.org/dev/peps/pep-0440/
 __version__ = '0.0.dev2'
 
+import os
+
 try:
-    from radares import EstacionRadar
-    from radares import ImagenRadarAEMET
-    from radares import ImagenRadarFile
-    #print(f'Import classes of radares ok from __init__.py (__name__ = {__name__}')
-except:
+    #Cuando importo tormetron desde el interprete interactivo o un script que no sea __main__.py (o tengo tormetron instalado en site-packages):
     from tormetron.radares import EstacionRadar
     from tormetron.radares import ImagenRadarAEMET
     from tormetron.radares import ImagenRadarFile
-    print(f'Import classes of tormetron.radares ok from __init__.py (__name__ = {__name__}')
+    #REMOVE: quitar este mensaje que aparece al importar tormetron:
+    FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+    print('Dev', end=' --> ')
+    print(f'Import classes of tormetron.radares ok desde __init__.py -> __name__: {__name__} ({FILE_DIR})')
+    #REMOVE/>
+except:
+    #Cuando importo tormetron desde __main__.py (y no tengo tormetron instalado en site-packages)
+    from radares import EstacionRadar
+    from radares import ImagenRadarAEMET
+    from radares import ImagenRadarFile
+    #REMOVE: quitar este mensaje que aparece al importar tormetron:
+    FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+    print('Dev', end=' --> ')
+    print(f'Import classes of radares ok desde __init__.py -> __name__: {__name__} ({FILE_DIR})')
+    #REMOVE/>
 
 def main():
     #REMOVE: quitar los comentarios y los print(). Sustituir por pass

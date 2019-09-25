@@ -16,6 +16,9 @@ import numpy as np
 import requests #Ver https://realpython.com/python-requests/
 #import urllib3
 #urllib3.disable_warnings()
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 try:
     from osgeo import gdal, osr
     from osgeo import gdalconst
@@ -458,7 +461,6 @@ class ImagenRadarAEMET:
 
         try:
             img_url = r1.json().get('datos')
-            self.verbose = True
             if self.verbose:
                 print('img_url:', img_url, img_url_)
                 #print(img_url)
@@ -505,7 +507,6 @@ class ImagenRadarAEMET:
         :param urlRadarAcum6hCompleto: Url de la paginweb en la que esta la imagen radar
         :param nombre_Imagen_acum6h: Nombre del archivo en el que se va a guardar
         """
-        self.verbose = True
         if self.verbose:
             print('Downloading from {}'.format(urlRadarAcum6hCompleto))
         try:

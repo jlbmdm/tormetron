@@ -41,29 +41,92 @@ Tipos de layouts:
       mimodulo.py, con las clases Clase1 y Clase2
   Si no tiene __main__.py, no vale para ejecutarlo en linea de comandos: hay que importarlo desde un script o el interprete de python
 
-#Markdown syntax:
-  Ver
-    https://guides.github.com/features/mastering-markdown/
-    https://help.github.com/en/articles/basic-writing-and-formatting-syntax
-
-#Creación de packages y subida a pypi
+#Preparación de packages y subida a pypi##########################################
 Ver:
   https://packaging.python.org/tutorials/packaging-projects/
   https://realpython.com/pypi-publish-python-package/
   https://realpython.com/python-application-layouts/
   https://realpython.com/pipenv-guide/
 
-#Building and uploading to pypi
-  $ python setup.py sdist
-    -> Solo crea:
-      /dist/tormetron-0.0.dev1.tar.gz
-      /tormetron.egg-info/*.*
-  $ python setup.py sdist bdist
-    -> Crea también:
-      /dist/tormetron-0.0.dev1.win-amd64.zip
-      /build/*.*
-      
-  $ twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+#setup.py -> Información para construir el paquete
+Ver:
+  https://docs.python.org/2/distutils/setupscript.html
+  http://www.3engine.net/wp/2016/05/como-preparar-y-distribuir-un-paquete-python/
+
+#MANIFEST.in -> Ficheros que se incluyen en el paquete
+Ver:
+  https://python.readthedocs.io/en/stable/distutils/sourcedist.html -> 4.1. Specifying the files to distribute
+
+#README.md -> Markdown syntax:
+  Ver
+    https://guides.github.com/features/mastering-markdown/
+    https://help.github.com/en/articles/basic-writing-and-formatting-syntax
+
+
+#Building and uploading to pypi (preparar y distribuir)
+  Preparar (building):
+    $ python setup.py sdist
+      -> Crea:
+        /dist/tormetron-0.0.dev1.tar.gz
+        /tormetron.egg-info/*.*
+    Si uso tb la opción bdist:
+      $ python setup.py sdist bdist
+        -> Crea también:
+          /dist/tormetron-0.0.dev1.win-amd64.zip ->->->->-> No se para que sirve; lo elimino
+          /build/*.* -> Copia del paquete sin comprimir
+    Ver https://python.readthedocs.io/en/stable/distutils/sourcedist.html para formato generado
+    No funciona: $ python setup.py sdist bdist_wheel
+  Pruebo a instalar el .tar.gz generado (ok):
+    $ pip install ./dist/tormetron-0.0.dev1.tar.gz ($ pip install dist/tormetron-0.0.dev1.tar.gz)
+      ...
+      Successfully installed tormetron-0.0.dev1
+  Chequeo el paquete generado:
+    $ twine check dist/*
+  Subir a test.pypi:
+    $ twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+      View at:
+        https://test.pypi.org/project/tormetron/0.0.dev2/
+      Instalación de tormetron 0.0.dev2:
+        pip install -i https://test.pypi.org/simple/ tormetron==0.0.dev2
+  Subir a pypi:
+    $ twine upload dist/*
+      View at:
+        https://pypi.org/project/tormetron/0.0.dev2/
+      Instalación de tormetron (última versión, por el momento, 0.0.dev2):
+        pip install tormetron
+
+  Puedo preparar y subir a pypi en un paso:
+    $ python setup.py register
+    $ python setup.py sdist upload
+
+
+  Chequeos:
+    Reviso si ya tengo instalado el tormetron:
+      $ pip freeze
+        ...
+        tormetron==0.0.dev1
+        ...
+    Lo desintalo:
+      $ pip uninstall tormetron
+        Uninstalling tormetron-0.0.dev1:
+          Would remove:
+            c:\osgeo4w64\apps\python37\lib\site-packages\tormetron-0.0.dev1-py3.7.egg-info
+            c:\osgeo4w64\apps\python37\lib\site-packages\tormetron\*
+            c:\osgeo4w64\apps\python37\scripts\tormetron-script.py
+            c:\osgeo4w64\apps\python37\scripts\tormetron.exe
+          Would not remove (might be manually added):
+            c:\osgeo4w64\apps\python37\lib\site-packages\tormetron\.aemet\Leeme.txt
+            c:\osgeo4w64\apps\python37\lib\site-packages\tormetron\.aemet\Leeme.txt.bak
+            c:\osgeo4w64\apps\python37\lib\site-packages\tormetron\.aemet\api.key
+        Proceed (y/n)?
+    Elimino tb la carpeta c:\osgeo4w64\apps\python37\lib\site-packages\tormetron\.aemet\*.*
+    Pruebo a instalar la nueva versión:
+      $ pip install tormetron
+        ...
+        Successfully installed tormetron-0.0.dev2
+    En cualquier momento puedo desinstalar la versión de site-packages e instalar la que tengo en desarrollo (sin subir a pypi):
+      $ pip uninstall tormetron
+      $ pip install d:/_ws/tormetron
 
 #Alternativas para usar o ejecutar un paquete##################################
 Ejecución en linea de comandos:

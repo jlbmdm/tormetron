@@ -50,9 +50,14 @@ elif os.path.exists(API_KEY_FILE2):
 else:
     API_KEY = ''
     API_KEY_FILE = ''
-    print(f'Fichero api.key no encontrado en {AEMET_DIR1} ni {AEMET_DIR2}')
-    print('Cuando se descarguen datos de la API de AEMET se solicitará entrada manual de API_KEY')
-    print('Para obtener una APY_KEY ir a: https://opendata.aemet.es/centrodedescargas/altaUsuario')
+    #REMOVE: valorar si quito este mensaje que aparece al importar tormetron:
+    print('Dev', end=' --> ')
+    print('Warning:')
+    print(f'\tFichero api.key no encontrado en {AEMET_DIR1} ni {AEMET_DIR2}')
+    print('\tSi se descargan datos de la API de AEMET se solicitará entrada manual de API_KEY')
+    print('\t\tPara obtener una APY_KEY ir a: https://opendata.aemet.es/centrodedescargas/altaUsuario')
+    print('\tPara descargar imagenes de precipitación acumulada de 6 horas no es necesaria la API_KEY')
+    #REMOVE/>
     
 # Endpoints
 BASE_URL = 'https://opendata.aemet.es/opendata/api'

@@ -1,10 +1,11 @@
 #Elaborado a partir de https://github.com/github/gitignore
 
-# radatron
-data/
-copiasSeguridad/
+# tormetron
 .aemet/
 api.key
+data/
+tormetron/data/
+copiasSeguridad/
 pruebas/*.*
 basura/*.*
 local/*.*
