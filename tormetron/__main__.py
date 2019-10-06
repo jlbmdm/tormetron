@@ -3,7 +3,7 @@
 '''
 Created on 31 ago. 2019
 
-@author: joseb
+@author: joseb & davidb
 # -*- coding: UTF8 -*-
 # -*- coding: cp1252 -*-
 Subido a test.pypi con:
